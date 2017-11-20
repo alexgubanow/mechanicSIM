@@ -1,0 +1,85 @@
+﻿<Window x:Class="mechanic.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:mechanic"
+        mc:Ignorable="d"
+        xmlns:zed="clr-namespace:ZedGraph;assembly=ZedGraph"
+        Title="MainWindow" Height="413.667" Width="196"
+        WindowStartupLocation="CenterScreen">
+    <Grid >
+        <Rectangle Panel.ZIndex="1000" x:Name="overlayrect" Fill="DarkGray" Opacity=".5" Visibility="Collapsed"/>
+        <Controls:ProgressRing IsActive="True" Panel.ZIndex="1000" x:Name="overlayring" Foreground="White" Visibility="Collapsed"/>
+        <Grid x:Name="mngr">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10*" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="1" Orientation="Vertical">
+                    <GroupBox Header="Force application:">
+                        <ComboBox x:Name="comboBox_forceapp" SelectionChanged="comboBox_forceapp_SelectionChanged"/>
+                    </GroupBox>
+                    <GroupBox Header="Force type:">
+                        <ComboBox x:Name="comboBox_forcetype" SelectionChanged="comboBox_forcetype_SelectionChanged"/>
+                    </GroupBox>
+                    <GroupBox Header="Force cycle:">
+                        <ComboBox x:Name="comboBox_forcecycle" SelectionChanged="comboBox_forcecycle_SelectionChanged"/>
+                    </GroupBox>
+                    <GroupBox Header="Force place:">
+                        <StackPanel x:Name="fv" Orientation="Horizontal" >
+                            <CheckBox x:Name="radioButton_forceplx" Margin="5" IsChecked="True" Content="X"/>
+                            <CheckBox x:Name="radioButton_forceply" Margin="5" Content="Y"/>
+                            <CheckBox x:Name="radioButton_forceplz" Margin="5" Content="Z"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <StackPanel Orientation="Horizontal">
+                        <GroupBox Header="Parameters:">
+                            <StackPanel Orientation="Vertical" x:Name="generstack">
+                                <StackPanel Orientation="Horizontal" x:Name="_cnt">
+                                    <Label Target="{Binding ElementName=textBox_numot}" Content="Cnt="/>
+                                    <TextBox x:Name="textBox_numot" Text="1" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    <Label Target="{Binding ElementName=textBox_numotpop}" Content="* 10^"/>
+                                    <TextBox x:Name="textBox_numotpop" Text="6" VerticalContentAlignment="Center" MinWidth="40"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" x:Name="_dt">
+                                    <Label Target="{Binding ElementName=textBox_deltat}" Content="dT= "/>
+                                    <TextBox x:Name="textBox_deltat" Text="1" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    <Label Target="{Binding ElementName=textBox_deltatpop}" Content="* 10^"/>
+                                    <TextBox x:Name="textBox_deltatpop" Text="-6" VerticalContentAlignment="Center" MinWidth="40"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" x:Name="_va">
+                                    <Label Target="{Binding ElementName=textBox_V0}" Content="Va= "/>
+                                    <TextBox x:Name="textBox_V0" Text="1" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    <Label Target="{Binding ElementName=textBox_V0pop}" Content="* 10^"/>
+                                    <TextBox x:Name="textBox_V0pop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" x:Name="_k">
+                                    <Label Target="{Binding ElementName=textBox_V0}" Content="k=   "/>
+                                    <TextBox x:Name="textBox_k" Text="1" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    <Label Target="{Binding ElementName=textBox_V0pop}" Content="* 10^"/>
+                                    <TextBox x:Name="textBox_kpop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" x:Name="_fq">
+                                    <Label Target="{Binding ElementName=textBox_freq}" Content="Fq= "/>
+                                    <TextBox x:Name="textBox_freq" Text="3" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    <Label Target="{Binding ElementName=textBox_freqpop}" Content="* 10^"/>
+                                    <TextBox x:Name="textBox_freqpop" Text="3" VerticalContentAlignment="Center" MinWidth="40"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                    <Button x:Name="btn_calc" Content="Calc" Click="btn_calc_Click" Height="37"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

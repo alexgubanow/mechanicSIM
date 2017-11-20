@@ -1,0 +1,162 @@
+﻿<Window x:Class="mechanic.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:mechanic"
+        mc:Ignorable="d"
+        xmlns:zed="clr-namespace:ZedGraph;assembly=ZedGraph"
+        Title="MainWindow"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Closing="Window_Closing" Width="607.473" Height="448.492" >
+    <Grid >
+        <!--<ProgressBar x:Name="progressBar1" HorizontalAlignment="Stretch" Height="10" VerticalAlignment="Top" Width="100" Visibility="Collapsed" Panel.ZIndex="10001"/>-->
+        <Button VerticalAlignment="Bottom" x:Name="btn_abrt" Content="ABORT" Click="btn_abrt_Click" Height="37" Visibility="Collapsed" Panel.ZIndex="10001"/>
+        <Rectangle Panel.ZIndex="1000" x:Name="overlayrect" Fill="DarkGray" Opacity=".5" Visibility="Collapsed"/>
+        <Controls:ProgressRing IsActive="True" Panel.ZIndex="1000" x:Name="overlayring" Foreground="White" Visibility="Collapsed"/>
+        <Grid x:Name="mngr">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <!--<Menu Grid.Row="0">
+                <MenuItem Header="File">
+                    <MenuItem Header="SaveAs..." Click="MenuItem_Click"></MenuItem>
+                    <Separator></Separator>
+                    <MenuItem Header="Exit" Click="exitMenuItem_Click"></MenuItem>
+                </MenuItem>
+            </Menu>-->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <!--<RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />-->
+                    <!--<RowDefinition Height="40" />-->
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <!--<WindowsFormsHost Grid.Row="0">
+                    <zed:ZedGraphControl x:Name="plotterxy"/>
+                </WindowsFormsHost>
+                <WindowsFormsHost Grid.Row="1">
+                    <zed:ZedGraphControl x:Name="plotter"/>
+                </WindowsFormsHost>-->
+                <!--<Slider Grid.Row="0" x:Name="slider" Minimum="0" Maximum="100" VerticalAlignment="Center" TickPlacement="Both" TickFrequency="0.1" SmallChange="0.0001" Thumb.DragCompleted="slider_DragCompleted"/>-->
+                <StackPanel Grid.Row="3" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Vertical"  x:Name="txtstack">
+                            <GroupBox Header="External load:">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" >
+                                        <TextBox x:Name="textBox_file" Text="" Width="101" Height="21"/>
+                                        <Button x:Name="btn_open" Content="Open" Click="btn_open_Click"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="fileInfo" Text="File info:"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <!--<GroupBox Header="Allow cos?">
+                                        <StackPanel>
+                                            <RadioButton x:Name="radioButton_sinyes" Content="Yes" Checked="radioButton_sinyes_Checked"/>
+                                            <RadioButton x:Name="radioButton_sinno" IsChecked="True" Content="No" Checked="radioButton_sinno_Checked"/>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <GroupBox Header="Static/Dynamic?">
+                                        <StackPanel>
+                                            <RadioButton x:Name="radioButton_static" Content="Static" Checked="radioButton_static_Checked"/>
+                                            <RadioButton x:Name="radioButton_dynamic" IsChecked="True" Content="Dynamic" Checked="radioButton_dynamic_Checked"/>
+                                        </StackPanel>
+                                    </GroupBox>-->
+                            <CheckBox x:Name="checkBoxIsconsole" Content="Is console out?" Unchecked="checkBoxIsconsole_Checked" Checked="checkBoxIsconsole_Checked"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Width="8"></StackPanel>
+                        <StackPanel>
+                            <GroupBox Header="Choose integration:">
+                                <StackPanel>
+                                    <ComboBox x:Name="comboBox_integr" Width="120" SelectionChanged="comboBox_integr_SelectionChanged"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Choose model:">
+                                <ComboBox x:Name="comboBox_models" Width="120" SelectionChanged="comboBox_models_SelectionChanged"/>
+                            </GroupBox>
+                            <GroupBox x:Name="comboRe" Visibility="Visible" Header="Choose type of Re:">
+                                <ComboBox x:Name="comboBox_Re" Width="120" SelectionChanged="comboBox_Re_SelectionChanged"/>
+                            </GroupBox>
+                            <GroupBox Header="Choose material:">
+                                <ComboBox x:Name="comboBox_mater" Width="120" SelectionChanged="comboBox_mater_SelectionChanged"/>
+                            </GroupBox>
+                            <CheckBox x:Name="checkBoxIscos" IsChecked="False" Content="Allow cos?" Margin="5" Checked="checkBoxIscos_Checked"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Width="8"></StackPanel>
+                        <GroupBox Header="Choose parameters:">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Target="{Binding ElementName=textBox_numP}" Content="Number points:"/>
+                                    <TextBox x:Name="textBox_numP" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_L}" Content="L="/>
+                                        <TextBox x:Name="textBox_L" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_Lpop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_Lpop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_D}" Content="D="/>
+                                        <TextBox x:Name="textBox_D" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_Dpop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_Dpop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_h}" Content="h="/>
+                                        <TextBox x:Name="textBox_h" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_hpop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_hpop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_b}" Content="b="/>
+                                        <TextBox x:Name="textBox_b" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_bpop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_bpop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_ro}" Content="ro="/>
+                                        <TextBox x:Name="textBox_ro" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_ropop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_ropop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_elas}" Content="E="/>
+                                        <TextBox x:Name="textBox_elas" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_elaspop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_elaspop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_v0}" Content="V0="/>
+                                        <TextBox x:Name="textBox_v0" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_v0pop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_v0pop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_vamp}" Content="Va="/>
+                                        <TextBox x:Name="textBox_vamp" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_vamppop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_vamppop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                    <StackPanel x:Name="numberRe" Visibility="Collapsed" Orientation="Horizontal">
+                                        <Label Target="{Binding ElementName=textBox_Renum}" Content="Re="/>
+                                        <TextBox x:Name="textBox_Renum" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                        <Label Target="{Binding ElementName=textBox_Renumpop}" Content="* 10^"/>
+                                        <TextBox x:Name="textBox_Renumpop" Text="0" VerticalContentAlignment="Center" MinWidth="40"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Height="5"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                    <Button x:Name="btn_calc" Content="Calc" Click="btn_calc_Click" Visibility="Visible" Height="37" VerticalAlignment="Bottom"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

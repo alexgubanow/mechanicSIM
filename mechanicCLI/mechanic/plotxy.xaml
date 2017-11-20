@@ -1,0 +1,110 @@
+﻿<Window x:Class="mechanic.plotxy"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:helix="clr-namespace:HelixToolkit.Wpf;assembly=HelixToolkit.Wpf"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:mechanic"
+        xmlns:zed="clr-namespace:ZedGraph;assembly=ZedGraph"
+        mc:Ignorable="d"
+        Title="plotxy">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <WindowsFormsHost x:Name="CurveBox" Grid.Column="1">
+                <zed:ZedGraphControl x:Name="mainPlot"/>
+            </WindowsFormsHost>
+            <StackPanel x:Name="infoStack" Grid.ColumnSpan="1" Grid.RowSpan="1">
+                <!--<WindowsFormsHost MinHeight="150" x:Name="FFTbox">
+                    <zed:ZedGraphControl x:Name="plotFFT" DoubleClick="plotFFT_DoubleClick"/>
+                </WindowsFormsHost>-->
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="expFreq" Target="{Binding ElementName=expFreqTextbox}" Margin="5"></Label>
+                        <TextBox x:Name="expFreqTextbox" Margin="5" VerticalContentAlignment="Center" MinWidth="130"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="CalcFreq" Target="{Binding ElementName=calcFreqTextbox}" Margin="5"></Label>
+                        <TextBox x:Name="calcFreqTextbox" Margin="5" VerticalContentAlignment="Center" MinWidth="130"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="setTime" Target="{Binding ElementName=setTimeTextbox}" Margin="5"></Label>
+                        <TextBox x:Name="setTimeTextbox" Margin="5" MinWidth="140"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="multiplierT" Target="{Binding ElementName=multiplierTTextbox}" Margin="5"></Label>
+                        <TextBox x:Name="multiplierTTextbox" Text="5" VerticalContentAlignment="Center" Margin="5" MinWidth="140"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Texp" Target="{Binding ElementName=periodExpTextbox}" Margin="5"></Label>
+                        <TextBox x:Name="periodExpTextbox" Margin="5" MinWidth="65"></TextBox>
+                        <Label Content="=" x:Name="TexpTcalclabel" Margin="5"></Label>
+                        <Label Content="Tcalc" Target="{Binding ElementName=periodCalcTextbox}" Margin="5"></Label>
+                        <TextBox x:Name="periodCalcTextbox" Margin="5" MinWidth="65"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="xTexp" Target="{Binding ElementName=periodExp5Textbox}" Margin="5"></Label>
+                        <TextBox x:Name="periodExp5Textbox" Margin="5" MinWidth="65"></TextBox>
+                        <Label Content="=" x:Name="Texp5Tcalc5label" Margin="5"></Label>
+                        <Label Content="xTcalc" Target="{Binding ElementName=periodCalc5Textbox}" Margin="5"></Label>
+                        <TextBox x:Name="periodCalc5Textbox" Margin="5" MinWidth="65"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel>
+                            <Label Content="On start" HorizontalAlignment="Center" Margin="5"></Label>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="max" Target="{Binding ElementName=maxOnStartTextbox}" Margin="5"></Label>
+                                <TextBox x:Name="maxOnStartTextbox" Margin="5" MinWidth="65"></TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="min" Target="{Binding ElementName=minOnStartTextbox}" Margin="5"></Label>
+                                <TextBox x:Name="minOnStartTextbox" Margin="5" MinWidth="65"></TextBox>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Bottom">
+                            <Label x:Name="onStEndMaxlabel" Content="=" Margin="5"></Label>
+                            <Label x:Name="onStEndMinlabel" Content="=" Margin="5"></Label>
+                        </StackPanel>
+                        <StackPanel>
+                            <Label Content="On end" HorizontalAlignment="Center" Margin="5"></Label>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="max" Target="{Binding ElementName=maxOnEndTextbox}" Margin="5"></Label>
+                                <TextBox x:Name="maxOnEndTextbox" Margin="5" MinWidth="65"></TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="min" Target="{Binding ElementName=minOnEndTextbox}" Margin="5"></Label>
+                                <TextBox x:Name="minOnEndTextbox" Margin="5" MinWidth="65"></TextBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                </StackPanel>
+            </StackPanel>
+            <Controls:RangeSlider 
+                x:Name="rangeSlider" Grid.Row="1" Grid.ColumnSpan="2"
+                TickPlacement="TopLeft" ExtendedMode="True"
+                LowerValueChanged="rangeSlider_LowerValueChanged" UpperValueChanged="rangeSlider_LowerValueChanged"
+                LowerThumbDragCompleted="rangeSlider_LowerThumbDragCompleted" UpperThumbDragCompleted="rangeSlider_LowerThumbDragCompleted"
+                AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="4" MoveWholeRange="True"
+                Minimum="{Binding Path=rangeSliderMinValue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                Maximum="{Binding Path=rangeSliderMaxValue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                LowerValue="{Binding Path=rangeSliderCurrentMinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                UpperValue="{Binding Path=rangeSliderCurrentMaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+    </Grid>
+</Window>
