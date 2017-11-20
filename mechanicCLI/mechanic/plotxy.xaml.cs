@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ZedGraph;
-using HelixToolkit.Wpf;
+//using HelixToolkit.Wpf;
 using System.Windows.Media.Media3D;
 using System.Runtime.InteropServices;
 using System.Drawing;

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mechanic", "mechanic\mechanic.csproj", "{EB26753D-DA21-4E51-8A47-4873CBFC0CA7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "myMatch", "myMatch\myMatch\myMatch.vcxproj", "{E058666D-72CD-40CE-B33C-646445FB1F72}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "myMatch", "myMatch\myMatch.vcxproj", "{E058666D-72CD-40CE-B33C-646445FB1F72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,17 +32,13 @@ Global
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|x64.ActiveCfg = Debug|x64
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|x64.Build.0 = Debug|x64
-		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|x64.Deploy.0 = Debug|x64
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|x86.ActiveCfg = Debug|Win32
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|x86.Build.0 = Debug|Win32
-		{E058666D-72CD-40CE-B33C-646445FB1F72}.Debug|x86.Deploy.0 = Debug|Win32
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|Any CPU.ActiveCfg = Release|Win32
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|x64.ActiveCfg = Release|x64
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|x64.Build.0 = Release|x64
-		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|x64.Deploy.0 = Release|x64
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|x86.ActiveCfg = Release|Win32
 		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|x86.Build.0 = Release|Win32
-		{E058666D-72CD-40CE-B33C-646445FB1F72}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ using System.Windows.Threading;
 using System.IO;
 using myMath;
 
-namespace mechanic
+namespace fexout
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml

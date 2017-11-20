@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mechanic", "mechanic\mechanic.csproj", "{EB26753D-DA21-4E51-8A47-4873CBFC0CA7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fexout", "mechanic\fexout.csproj", "{EB26753D-DA21-4E51-8A47-4873CBFC0CA7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "myMath", "myMath\myMath.vcxproj", "{BE967C73-A274-4580-8714-ABAB04431923}"
 EndProject
