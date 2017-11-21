@@ -520,11 +520,23 @@ namespace myMatch
 						double w = 2 * M_PI * 3000;
 						Venv = gcnew array < double >(3);
 						Venv[0] = Vm[i][np][0];
-						/*if (numP > 1)
+						if (numP > 1)
 						{
-							double Vm = 
-							Venv[0] = Venv[0] + 
-						}*/
+							double nu = um;
+							double r = D / 2;
+							double cosFi = 1;
+							double moduleV = abs(lstv[i][np][0]);
+							double A0 = ((3 * nu * r) / 2 * moduleV) * (1 + ((3 * r) / (8 * nu)) * moduleV);
+							double Vm = -(A0 / pow(r, 2)) + ( (A0 * exp( -( (moduleV * r * ( 1 + cosFi)) / (2 * nu) )) ) / pow(r, 2) ) * ( 1 + (moduleV / (2 * nu)) * r * ( 1 - cosFi));
+							if ( np == 0 )
+							{
+								Venv[0] = Venv[0] - Vm;
+							}
+							if (np == 1)
+							{
+								Venv[0] = Venv[0] + Vm;
+							}
+						}
 						double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
 						double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
 						double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
