@@ -364,7 +364,7 @@ namespace myMatch
 				Console::WriteLine(DateTime::Now);
 			}
 			//freopen_s("CON", "w", stdout);
-			Console::WriteLine(DateTime::Now);
+			//Console::WriteLine(DateTime::Now);
 			double A = b * h;
 			double Iz = ((b * h * h * h) / 12);
 			if (h == 0 || b == 0)
@@ -375,337 +375,284 @@ namespace myMatch
 			double r = D / 2;
 			if (model == Models::particle)
 			{
-				A = M_PI * (r * r * r) * ((double) 4 / (double) 3);
+				A = M_PI * (r * r * r) * ((double)4 / (double)3);
 			}
-			Console::WriteLine("START");
-			Console::WriteLine("A = " + A);
-			Console::WriteLine("D = " + D);
-			Console::WriteLine("ro = " + ro);
-		bool isConsOut = false;
-		FileStream^ fs = gcnew FileStream(flnameExtLoad, FileMode::Open);
-		StreamReader^ sr = gcnew StreamReader(fs);
-		array<double>^ Vm = gcnew array < double >(3);
-		for (int linenum = 0; linenum < 4; linenum++)
-		{
-			sr->ReadLine();
-		}
-		lstv[0][0][0] = v0;
-		lstvAN[0][0][0] = v0;
-		array<double>^ Load = gcnew array<double>(3);
-		//double localTime = 0;
-		int countCycle = 0;
-
-		for (int i = 1; i < counts; i++)
-		{
-			bool predictor = true;
-			strtoLoad(sr->ReadLine(), Load);
-			for (int np = 0; np < numP; np++)
+			if (IsConsoleOut)
 			{
-				double l = L / numP;
-				double massa = ro * A * l;
-				if (model == Models::particle)
-				{
-					//massa = 6.4340E-13;
-					massa = ro * A;
-				}
+				Console::WriteLine("START");
+				Console::WriteLine("A = " + A);
+				Console::WriteLine("D = " + D);
+				Console::WriteLine("ro = " + ro);
+			}
+			bool isConsOut = false;
+			FileStream^ fs = gcnew FileStream(flnameExtLoad, FileMode::Open);
+			StreamReader^ sr = gcnew StreamReader(fs);
+			array<array<array<double>^>^>^ Vm = gcnew array<array<array<double>^>^>(time->Length);
+			initArr::_3d(numP, 3, Vm);
 
-				if (points[np].ExtLoad != ExtLoadType::none)
+			for (int linenum = 0; linenum < 4; linenum++)
+			{
+				sr->ReadLine();
+			}
+			lstv[0][0][0] = v0;
+			lstvAN[0][0][0] = v0;
+			array<double>^ Load = gcnew array<double>(3);
+			//int countCycle = 0;
+
+			for (int i = 1; i < counts; i++)
+			{
+				bool predictor = true;
+				strtoLoad(sr->ReadLine(), Load);
+				for (int np = 0; np < numP; np++)
 				{
+					double l = L / numP;
+					double massa = ro * A * l;
+					if (model == Models::particle)
+					{
+						massa = ro * A;
+					}
+
+					if (points[np].ExtLoad != ExtLoadType::none)
+					{
+						switch (points[np].ExtLoad)
+						{
+						case ExtLoadType::coords:
+							lstcoords[i][np][0] = lstcoords[i][np][0] + Load[0];
+							lstcoords[i][np][1] = lstcoords[i][np][1] + Load[1];
+							lstcoords[i][np][2] = lstcoords[i][np][2] + Load[2];
+							break;
+						case ExtLoadType::displ:
+							lstdispla[i][np] = Load;
+							break;
+						case ExtLoadType::velos:
+							Vm[i][np] = Load;
+							break;
+						case ExtLoadType::force:
+							lstF[i][np] = Load;
+							break;
+						}
+					}
 					switch (points[np].ExtLoad)
 					{
 					case ExtLoadType::coords:
-						lstcoords[i][np][0] = lstcoords[i][np][0] + Load[0];
-						lstcoords[i][np][1] = lstcoords[i][np][1] + Load[1];
-						lstcoords[i][np][2] = lstcoords[i][np][2] + Load[2];
+						Integration::get_xvab_from_coords(lstcoords[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
+							lstdispla[i][np], lstv[i][np], lsta[i][np]);
 						break;
 					case ExtLoadType::displ:
-						lstdispla[i][np] = Load;
+						Integration::get_coordsvab_from_dipl(lstdispla[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
+							lstdispla[i][np], lstv[i][np], lsta[i][np]);
 						break;
-					case ExtLoadType::velos:
-						Vm = Load;
-						break;
-					case ExtLoadType::force:
-						lstF[i][np] = Load;
+					default:
+						switch (shema)
+						{
+						case IntegrSchems::euler:
+							Integration::euler(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i - 1][np], dt, massa, l,
+								lstdispla[i][np], lstv[i][np], lsta[i][np]);
+							break;
+						case IntegrSchems::verlet:
+							Integration::verlet(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i - 1][np], dt, massa, l,
+								lstdispla[i][np], lstv[i][np], lsta[i][np]);
+							break;
+						case IntegrSchems::gear:
+							if (predictor)
+							{
+								Integration::gearp(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstb[i - 1][np], lstF[i - 1][np], dt, massa, l,
+									lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
+								break;
+							}
+							else
+							{
+								Integration::gearc(lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np], lstF[i][np], dt, massa, l,
+									lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
+								break;
+							}
+						}
+						lstcoords[i][np][0] = lstcoords[i - 1][np][0] + lstdispla[i][np][0];
+						lstcoords[i][np][1] = lstcoords[i - 1][np][1] + lstdispla[i][np][1];
+						lstcoords[i][np][2] = lstcoords[i - 1][np][2] + lstdispla[i][np][2];
 						break;
 					}
-				}
-				switch (points[np].ExtLoad)
-				{
-				case ExtLoadType::coords:
-					Integration::get_xvab_from_coords(lstcoords[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
-						lstdispla[i][np], lstv[i][np], lsta[i][np]);
-					break;
-				case ExtLoadType::displ:
-					Integration::get_coordsvab_from_dipl(lstdispla[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
-						lstdispla[i][np], lstv[i][np], lsta[i][np]);
-					break;
-				case ExtLoadType::force:
-					switch (shema)
+
+					array<double>^ Re = gcnew array < double >(3);
+					array<double>^ Venv = gcnew array < double >(3);
+					array<double>^ currUx = lstdispla[i][np];
+					array<double>^ lastUx = lstdispla[i - 1][np];
+
+					if (model == Models::particle && predictor)
 					{
-					case IntegrSchems::euler:
-						Integration::euler(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i - 1][np], dt, massa, l,
-							lstdispla[i][np], lstv[i][np], lsta[i][np]);
-						break;
-					case IntegrSchems::verlet:
-						Integration::verlet(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i - 1][np], dt, massa, l,
-							lstdispla[i][np], lstv[i][np], lsta[i][np]);
-						break;
-					case IntegrSchems::gear:
-						if (predictor)
+						if (Retype == Retypes::dyn)
 						{
-							Integration::gearp(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstb[i - 1][np], lstF[i - 1][np], dt, massa, l,
-								lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
-							break;
+							for (int j = 0; j < 3; j++)
+							{
+								Re[j] = (lstv[i][np][j] * D) / um;
+							}
+						}
+						else if (Retype == Retypes::stat)
+						{
+							for (int j = 0; j < 3; j++)
+							{
+								Re[j] = Renum;
+							}
+						}
+						//countCycle++;
+						double w = 2 * M_PI * 3000;
+						Venv = gcnew array < double >(3);
+						Venv[0] = Vm[i][np][0];
+						double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
+						double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
+						double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
+						double qP = 0;
+						if (Retype == Retypes::dyn)
+						{
+							double h = (9 * ro * vamp) / (2 * M_PI * ro * w * D);
+							qP = (qPs + h * (ls * ls)) / Math::Sqrt(1 + 2 * h * (ls * ls) * qPs + (h * h) * (ls * ls* ls* ls));
+						}
+						else if (Retype == Retypes::stat)
+						{
+							qP = qPs;
+						}
+						double fiP = Math::Atan(w * tauP);
+						if (!isConsOut)
+						{
+							Console::WriteLine("massa = " + massa);
+							Console::WriteLine("tauP = " + tauP);
+							Console::WriteLine("qP = " + qP);
+							Console::WriteLine("fiP = " + fiP);
+							Console::WriteLine("END");
+							isConsOut = true;
+						}
+						lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * Math::Sin((w *  time[i]) - fiP);
+					}
+
+					if (np == 0)
+					{
+						//l = Math.Sqrt(pow2(lstcoords[i][np][0] - lstcoords[i][np + 1][0]) - pow2(lstcoords[i][np][1] - lstcoords[i][np + 1][1]));
+						if (CalcType == CalcTypes::statical)
+						{
+							switch (model)
+							{
+							case Models::liner:
+								ForceCalcs::metal(currUx, lastUx, Iz, A, l, elastic, lstFep1[i][np]);
+								break;
+							case Models::moonriv:
+								ForceCalcs::chorda(currUx, lastUx, A, l, lstFep1[i][np]);
+								break;
+							case Models::particle:
+								ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstFep1[i][np]);
+								break;
+							default:
+								break;
+							}
 						}
 						else
 						{
-							Integration::gearc(lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np], lstF[i][np], dt, massa, l,
-								lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
-							break;
+							switch (model)
+							{
+							case Models::liner:
+								ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
+								break;
+							case Models::moonriv:
+								ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
+								break;
+							case Models::particle:
+								ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstFep1[i][np]);
+								break;
+							default:
+								break;
+							}
 						}
 					}
-					lstcoords[i][np][0] = lstcoords[i - 1][np][0] + lstdispla[i][np][0];
-					lstcoords[i][np][1] = lstcoords[i - 1][np][1] + lstdispla[i][np][1];
-					lstcoords[i][np][2] = lstcoords[i - 1][np][2] + lstdispla[i][np][2];
-					break;
-				}
-
-				array<double>^ currUx = lstdispla[i][np];
-				array<double>^ lastUx = lstdispla[i - 1][np];
-
-				array<double>^ Re = gcnew array < double >(3);
-				if (Retype == Retypes::dyn)
-				{
-					for (int j = 0; j < 3; j++)
+					else if (np == numP - 1)
 					{
-						Re[j] = (lstv[i][np][j] * D) / um;
-					}
-				}
-				else if (Retype == Retypes::stat)
-				{
-					for (int j = 0; j < 3; j++)
-					{
-						Re[j] = Renum;
-					}
-				}
-				if (model == Models::particle && predictor)
-				{
-					countCycle++;
-					double w = 2 * M_PI * 3000;
-					Vm = gcnew array < double >(3);
-					Vm[0] = vamp * Math::Sin(w * time[i]);
-					double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
-					double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
-					double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
-					double qP = 0;
-					if (Retype == Retypes::dyn)
-					{
-						double h = (9 * ro * vamp) / ( 2 * M_PI * ro * w * D);
-						qP = (qPs + h * (ls * ls)) / Math::Sqrt(1 + 2 * h * (ls * ls) * qPs + (h * h) * (ls * ls* ls* ls));
-					}
-					else if(Retype == Retypes::stat)
-					{
-						qP = qPs;
-					}
-					//double qP = 0.1139;
-					double fiP = Math::Atan(w * tauP);
-					if (!isConsOut)
-					{
-						Console::WriteLine("massa = " + massa);
-						Console::WriteLine("tauP = " + tauP);
-						Console::WriteLine("qP = " + qP);
-						Console::WriteLine("fiP = " + fiP);
-						Console::WriteLine("END");
-						isConsOut = true;
-					}
-					lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * Math::Sin((w *  time[i]) - fiP);
-				}
-
-				if (np == 0)
-				{
-					//l = Math.Sqrt(pow2(lstcoords[i][np][0] - lstcoords[i][np + 1][0]) - pow2(lstcoords[i][np][1] - lstcoords[i][np + 1][1]));
-
-					if (CalcType == CalcTypes::statical)
-					{
-						switch (model)
-						{
-						case Models::liner:
-							ForceCalcs::metal(currUx, lastUx, Iz, A, l, elastic, lstFep1[i][np]);
-							break;
-						case Models::moonriv:
-							ForceCalcs::chorda(currUx, lastUx, A, l, lstFep1[i][np]);
-							break;
-						case Models::particle:
-							ForceCalcs::particle(Vm, lstv[i][np], D, Re, lstFep1[i][np]);
-							break;
-						default:
-							break;
-						}
+						//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
 					}
 					else
 					{
-						switch (model)
+						if (CalcType == CalcTypes::statical)
 						{
-						case Models::liner:
-							ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
-							break;
-						case Models::moonriv:
-							ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
-							break;
-						case Models::particle:
-							ForceCalcs::particle(Vm, lstv[i][np], D, Re, lstFep1[i][np]);
-							break;
-						default:
-							break;
-						}
-					}
-				}
-				else if (np == numP - 1)
-				{
-					//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
-				}
-				else
-				{
-					if (CalcType == CalcTypes::statical)
-					{
 
-						switch (model)
-						{
-						case Models::liner:
-							ForceCalcs::metal(currUx, lastUx, Iz, A, l, elastic, lstFep1[i][np]);
-							break;
-						case Models::moonriv:
-							ForceCalcs::chorda(currUx, lastUx, A, l, lstFep1[i][np]);
-							break;
-						case Models::particle:
-							break;
-						default:
-							break;
+							switch (model)
+							{
+							case Models::liner:
+								ForceCalcs::metal(currUx, lastUx, Iz, A, l, elastic, lstFep1[i][np]);
+								break;
+							case Models::moonriv:
+								ForceCalcs::chorda(currUx, lastUx, A, l, lstFep1[i][np]);
+								break;
+							case Models::particle:
+								break;
+							default:
+								break;
+							}
 						}
-					}
-					else
-					{
-						switch (model)
+						else
 						{
-						case Models::liner:
-							ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
-							break;
-						case Models::moonriv:
-							ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
-							break;
-						case Models::particle:
-							break;
-						default:
-							break;
+							switch (model)
+							{
+							case Models::liner:
+								ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
+								break;
+							case Models::moonriv:
+								ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
+								break;
+							case Models::particle:
+								break;
+							default:
+								break;
+							}
 						}
+						lstFem1[i][np][0] = 0 - lstFep1[i][np - 1][0];
+						lstFem1[i][np][1] = 0 - lstFep1[i][np - 1][1];
 					}
-					lstFem1[i][np][0] = 0 - lstFep1[i][np - 1][0];
-					lstFem1[i][np][1] = 0 - lstFep1[i][np - 1][1];
-				}
-				switch (MaterialModeltype)
-				{
-				case MaterialModels::n0:
-					if (lstFem1[i][np][0] < 0)
+					switch (MaterialModeltype)
 					{
-						lstFem1[i][np][0] = 0;
+					case MaterialModels::n0:
+						if (lstFem1[i][np][0] < 0)
+						{
+							lstFem1[i][np][0] = 0;
+						}
+						break;
 					}
-					break;
-				}
-				lstF[i][np][0] = lstF[i][np][0] + lstFem1[i][np][0] + lstFep1[i][np][0];
-				lstF[i][np][1] = lstF[i][np][1] + lstFem1[i][np][1] + lstFep1[i][np][1];
-				lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
-				if (np == numP - 1)
-				{
-					//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
-					if (shema == IntegrSchems::gear && predictor)
+					lstF[i][np][0] = lstF[i][np][0] + lstFem1[i][np][0] + lstFep1[i][np][0];
+					lstF[i][np][1] = lstF[i][np][1] + lstFem1[i][np][1] + lstFep1[i][np][1];
+					lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
+					if (np == numP - 1)
 					{
-						predictor = false;
-						np = -1;
+						//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
+						if (shema == IntegrSchems::gear && predictor)
+						{
+							predictor = false;
+							np = -1;
+						}
 					}
 				}
 			}
-		}
-		Console::WriteLine("countCycle = " + countCycle);
-		sr->Close();
-		fs->Close();
-		return 0;
-	};
-	int calcMovementStatic(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype,
-	double const L, double const A, double const Iz, double const ro, int const numP, int const counts, double const dt, double const elastic, double const v0,
-		array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
-		array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords)
-	{
-	//AllocConsole();
-	/*Console::WriteLine(L"Hello World using Managed Extensions for C++!");
-	Console::WriteLine("Hello World using Managed Extensions for C++!");*/
-	FileStream^ fs = gcnew FileStream(flnameExtLoad, FileMode::Open);
-	StreamReader^ sr = gcnew StreamReader(fs);
-	for (int linenum = 0; linenum < 4; linenum++)
-	{
-		sr->ReadLine();
-	}
-	//sr->BaseStream->
-	/*while (sr->Peek() >= 0)
-	{
-	Console::WriteLine(sr->ReadLine());
-	}*/
-	lstv[0][0][0] = v0;
-	array<double>^ Load = gcnew array<double>(3);
-	for (int i = 1; i < counts; i++)
-	{
-		bool predictor = true;
-		strtoLoad(sr->ReadLine(), Load);
-		ForceCalcs::metalStatic(Load, Iz, A, L, elastic, lstFep1[i][0]);		
-	}
+			sr->Close();
+			fs->Close();
+			return 0;
+		};
 
-	sr->Close();
-	fs->Close();
-	return 0;
-	};
-			int calct(int numt, double dt, array<double>^ %t)
+		int getExtStr(String^ fileName, array<String^>^ %strLoad)
+		{
+			try
 			{
-				t = gcnew array<double>(numt);
-				t[0] = 0;
-				for (int i = 1; i < numt; i++)
-				{
-					t[i] = t[i - 1] + dt;
-				}
-				return 0;
-			};
-			int initarr(int x, int y, int z, array<array<array<double>^>^>^ %arr)
+				String^ delimStr = "\n";
+				array<Char>^ delimiter = delimStr->ToCharArray();
+				StreamReader^ din = File::OpenText(fileName);
+				String^ outstr = din->ReadToEnd();
+				strLoad = outstr->Split(delimiter);
+			}
+			catch (Exception^ e)
 			{
-				arr = gcnew array<array<array<double>^>^>(x);
-				for (int i = 0; i < x; i++)
-				{
-					arr[i] = gcnew array<array<double>^>(y);
-					for (int np = 0; np < y; np++)
-					{
-						arr[i][np] = gcnew array<double>(z);
-					}
-				}
-				return 0;
-			};
-			int getExtStr(String^ fileName, array<String^>^ %strLoad)
-			{
-				try
-				{
-					String^ delimStr = "\n";
-					array<Char>^ delimiter = delimStr->ToCharArray();
-					StreamReader^ din = File::OpenText(fileName);
-					String^ outstr = din->ReadToEnd();
-					strLoad = outstr->Split(delimiter);
-				}
-				catch (Exception^ e)
-				{
-					if (dynamic_cast<FileNotFoundException^>(e))
-						return 404;
-					//Console::WriteLine("file '{0}' not found", fileName);
-					else
-						return 1;
-					//Console::WriteLine("problem reading file '{0}'", fileName);
-				}
-				return 0;
-			};
+				if (dynamic_cast<FileNotFoundException^>(e))
+					return 404;
+				//Console::WriteLine("file '{0}' not found", fileName);
+				else
+					return 1;
+				//Console::WriteLine("problem reading file '{0}'", fileName);
+			}
+			return 0;
+		};
 			int getnumExtLoad(array<String^>^ strLoad, array<int>^ %findIndex)
 			{
 				String^ numLoad = "";
@@ -845,6 +792,40 @@ namespace myMatch
 				}
 				return 0;
 			};
+	};
+
+	public ref class calc
+	{
+	public:
+		static void t(int numt, double dt, array<double>^ %t)
+		{
+			//t = gcnew array<double>(numt);
+			t[0] = 0;
+			for (int i = 1; i < numt; i++)
+			{
+				t[i] = t[i - 1] + dt;
+			}
+		};
+	};
+	public ref class initArr
+	{
+	public:
+		static void _1d(int x, array<double>^ %arr)
+		{
+			arr = gcnew array<double>(x);
+		};
+		static void _3d(int y, int z, array<array<array<double>^>^>^ %arr)
+		{
+			//arr = gcnew array<array<array<double>^>^>(x);
+			for (int i = 0; i < arr->Length; i++)
+			{
+				arr[i] = gcnew array<array<double>^>(y);
+				for (int np = 0; np < y; np++)
+				{
+					arr[i][np] = gcnew array<double>(z);
+				}
+			}
+		};
 	};
 
 }

@@ -62,7 +62,7 @@ namespace mechanic
         //MainFuncs.point[] points;
 
         Thread thrdraw;
-        enum materialsDB
+        enum MaterialsDB
         {
             blank,
             metal,
@@ -88,7 +88,7 @@ namespace mechanic
             comboBox_models.SelectedIndex = 0;
             comboBox_Re.ItemsSource = Enum.GetValues(typeof(Retypes));
             comboBox_Re.SelectedIndex = 0;
-            comboBox_mater.ItemsSource = Enum.GetValues(typeof(materialsDB));
+            comboBox_mater.ItemsSource = Enum.GetValues(typeof(MaterialsDB));
             comboBox_mater.SelectedIndex = 0;
             checkBoxIsconsole.IsChecked = IsConsoleOut;
         }
@@ -180,8 +180,8 @@ namespace mechanic
                         points[Convert.ToInt32(strload[1])].ExtLoad = myfuncs.get_pinfo(strload[2]);
                         sr.Close();
                         fs.Close();
-                        myfuncs.calct(countsExt, dtExt, ref time);                        
-                        myfuncs.initarr(countsExt, numP, 3, ref lstF);
+                        calc.t(countsExt, dtExt, ref time);                        
+                        initarr._1d(countsExt, numP, 3, ref lstF);
                         myfuncs.initarr(countsExt, numP, 3, ref lstdispla);
                         myfuncs.initarr(countsExt, numP, 3, ref lstcoords);
                         myfuncs.initCoordsArr(L / numP, points, ref lstcoords);
@@ -484,7 +484,7 @@ namespace mechanic
         {
             switch (e.AddedItems[0])
             {
-                case materialsDB.blank:
+                case MaterialsDB.blank:
                     textBox_numP.Text = 0.ToString();
                     textBox_ro.Text = 0.ToString();
                     textBox_ropop.Text = 0.ToString();
@@ -499,7 +499,7 @@ namespace mechanic
                     textBox_elas.Text = 0.ToString();
                     textBox_elaspop.Text = 0.ToString();
                     break;
-                case materialsDB.metal:
+                case MaterialsDB.metal:
                     textBox_numP.Text = 5.ToString();
                     textBox_ro.Text = 77.ToString();
                     textBox_ropop.Text = 2.ToString();
@@ -514,7 +514,7 @@ namespace mechanic
                     textBox_elas.Text = 215.ToString();
                     textBox_elaspop.Text = 9.ToString();
                     break;
-                case materialsDB.chorda:
+                case MaterialsDB.chorda:
                     textBox_numP.Text = 3.ToString();
                     textBox_ro.Text = 104.ToString();
                     textBox_ropop.Text = 1.ToString();
@@ -529,7 +529,7 @@ namespace mechanic
                     textBox_elas.Text = 5.ToString();
                     textBox_elaspop.Text = 8.ToString();
                     break;
-                case materialsDB.artChorda:
+                case MaterialsDB.artChorda:
                     textBox_numP.Text = 5.ToString();
                     textBox_ro.Text = 220.ToString();
                     textBox_ropop.Text = 1.ToString();
@@ -544,7 +544,7 @@ namespace mechanic
                     textBox_elas.Text = 75.ToString();
                     textBox_elaspop.Text = 8.ToString();
                     break;
-                case materialsDB.glassPart:
+                case MaterialsDB.glassPart:
                     textBox_numP.Text = 2.ToString();
                     textBox_ro.Text = 24.ToString();
                     textBox_ropop.Text = 2.ToString();
