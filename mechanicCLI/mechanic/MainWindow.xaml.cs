@@ -128,10 +128,15 @@ namespace mechanic
                         double[][][] lstFep1 = new double[countsExt][][];
                         double[][][] lsta = new double[countsExt][][];
                         double[][][] lstv = new double[countsExt][][];
-                        double[][][] lstvAN = new double[countsExt][][];
                         double[][][] lstdispla = new double[countsExt][][];
                         double[][][] lstcoords = new double[countsExt][][];
                         double[][][] lstb = new double[countsExt][][];
+
+                        double[][][] lstaAN = new double[countsExt][][];
+                        double[][][] lstvAN = new double[countsExt][][];
+                        double[][][] lstdisplAN = new double[countsExt][][];
+                        double[][][] lstcoordsAN = new double[countsExt][][];
+
                         strRead = sr.ReadLine();
                         double dtExt = Convert.ToDouble(strRead);
                         string[] strload = sr.ReadLine().Split(':');
@@ -167,9 +172,12 @@ namespace mechanic
                         initArr._3d( numP, 3, ref lstFep1);
                         initArr._3d( numP, 3, ref lsta);
                         initArr._3d( numP, 3, ref lstv);
-                        initArr._3d( numP, 3, ref lstvAN);
                         initArr._3d( numP, 3, ref lstb);
-                        
+                        initArr._3d(numP, 3, ref lstaAN);
+                        initArr._3d(numP, 3, ref lstvAN);
+                        initArr._3d(numP, 3, ref lstdisplAN);
+                        initArr._3d(numP, 3, ref lstcoordsAN);
+
                         if (CalcType == CalcTypes.statical)
                         {
                             calc.StaticMovement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
@@ -180,7 +188,8 @@ namespace mechanic
                         {
                             calc.Movement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
                                 L, b, h, ro, numP, countsExt, elastic, v0, vamp, D, Re, time,
-                                ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstb, ref lstv, ref lstdispla, ref lstcoords, ref lstvAN);
+                                ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstb, ref lstv, ref lstdispla, ref lstcoords,
+                                ref lstaAN, ref lstvAN, ref lstdisplAN, ref lstcoordsAN);
                         }
                         
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -236,6 +245,18 @@ namespace mechanic
                                 plot.initControls();
                                 plot.coords = lstv;
                                 plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(x)", "t", "v", true, System.Drawing.Color.Blue);
+                                plot.initControls();
+                                plotxys.Add(plot);
+
+                                plot = new plotxy();
+                                plot.Show();
+                                plot.dt = dtExt;
+                                plot.time = time;
+                                plot.coords = lstaAN;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "aAN(x)", "t", "aAN", false, System.Drawing.Color.Red);
+                                plot.initControls();
+                                plot.coords = lsta;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "a(x)", "t", "a", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
                             }

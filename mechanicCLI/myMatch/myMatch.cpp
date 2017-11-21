@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #define _USE_MATH_DEFINES
-#include <math.h>  
+//#include <math.h>  
 #include <typeinfo> 
 #using <system.dll> 
 #using <mscorlib.dll>
@@ -380,7 +380,8 @@ namespace myMatch
 		static void Movement(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype, Retypes Retype, bool IsConsoleOut,
 			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double const v0, double const vamp, double const D, double const Renum, array<double>^ time,
 			array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
-			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords, array<array<array<double>^>^>^ %lstvAN)
+			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords,
+			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN)
 		{
 			double dt = time[1];
 			if (IsConsoleOut)
@@ -518,25 +519,6 @@ namespace myMatch
 						}
 						//countCycle++;
 						double w = 2 * M_PI * 3000;
-						Venv = gcnew array < double >(3);
-						Venv[0] = Vm[i][np][0];
-						if (numP > 1)
-						{
-							double nu = um;
-							double r = D / 2;
-							double cosFi = 1;
-							double moduleV = abs(lstv[i][np][0]);
-							double A0 = ((3 * nu * r) / 2 * moduleV) * (1 + ((3 * r) / (8 * nu)) * moduleV);
-							double Vm = -(A0 / pow(r, 2)) + ( (A0 * exp( -( (moduleV * r * ( 1 + cosFi)) / (2 * nu) )) ) / pow(r, 2) ) * ( 1 + (moduleV / (2 * nu)) * r * ( 1 - cosFi));
-							if ( np == 0 )
-							{
-								Venv[0] = Venv[0] - Vm;
-							}
-							if (np == 1)
-							{
-								Venv[0] = Venv[0] + Vm;
-							}
-						}
 						double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
 						double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
 						double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
@@ -560,7 +542,34 @@ namespace myMatch
 							Console::WriteLine("END");
 							isConsOut = true;
 						}
-						lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * Math::Sin((w *  time[i]) - fiP);
+						Venv = gcnew array < double >(3);						
+						if (numP > 1)
+						{
+							double nu = um;
+							double r = D / 2;
+							double cosFi = 1;
+							double moduleV = abs(lstv[i][np][0]);
+							double A0 = ((3 * nu * r) / 2 * moduleV) * (1 + ((3 * r) / (8 * nu)) * moduleV);
+							double Vmp = -(A0 / pow(r, 2)) + ((A0 * exp(-((moduleV * r * (1 + cosFi)) / (2 * nu)))) / pow(r, 2)) * (1 + (moduleV / (2 * nu)) * r * (1 - cosFi));
+							if (np == 0)
+							{
+								Venv[0] = Vm[i][np][0] - Vmp;
+								lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) - Vmp);
+								lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) - Vmp);
+							}
+							if (np == 1)
+							{
+								Venv[0] = Vm[i][np][0] + Vmp;
+								lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) - Vmp);
+								lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) - Vmp);
+							}
+						}
+						else
+						{
+							Venv[0] = Vm[i][np][0];
+							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * sin((w *  time[i]) - fiP);
+							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * vamp * cos((w *  time[i]) - fiP) * w;
+						}
 					}
 
 					switch (model)
