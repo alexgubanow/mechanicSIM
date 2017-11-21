@@ -414,16 +414,18 @@ namespace myMatch
 			StreamReader^ sr = gcnew StreamReader(fs);
 			array<array<array<double>^>^>^ Vm = gcnew array<array<array<double>^>^>(time->Length);
 			initArr::_3d(numP, 3, Vm);
-			
+
 			for (int linenum = 0; linenum < 4; linenum++)
 			{
 				sr->ReadLine();
 			}
-			lstv[0][0][0] = v0;
-			lstvAN[0][0][0] = v0;
 			array<double>^ Load = gcnew array<double>(3);
 			//int countCycle = 0;
-
+			for (int k = 0; k < numP; k++)
+			{
+				lstv[0][k][0] = v0;
+				lstvAN[0][k][0] = v0;
+			}
 			for (int i = 1; i < counts; i++)
 			{
 				bool predictor = true;
@@ -518,6 +520,11 @@ namespace myMatch
 						double w = 2 * M_PI * 3000;
 						Venv = gcnew array < double >(3);
 						Venv[0] = Vm[i][np][0];
+						/*if (numP > 1)
+						{
+							double Vm = 
+							Venv[0] = Venv[0] + 
+						}*/
 						double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
 						double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
 						double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));

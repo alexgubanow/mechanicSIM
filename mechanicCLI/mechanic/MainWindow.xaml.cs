@@ -34,6 +34,7 @@ namespace mechanic
         MaterialModels MaterialModeltype = MaterialModels.normal;
         CalcTypes CalcType = CalcTypes.dynamical;
         
+        
         Thread thrdraw;
         enum MaterialsDB
         {
@@ -135,10 +136,24 @@ namespace mechanic
                         double dtExt = Convert.ToDouble(strRead);
                         string[] strload = sr.ReadLine().Split(':');
                         points = new point[numP];
-                        for (int np = 0; np < numP; np++)
+                        ExtLoadType loadType = ExtLoad.getPoint(strload[2]);
+                        if (Modeltype == Models.particle)
                         {
-                            points[np] = new point();
-                            points[np].ExtLoad = ExtLoadType.none;
+                            for (int np = 0; np < numP; np++)
+                            {
+                                points[np] = new point
+                                {
+                                    ExtLoad = loadType
+                                };
+                            }
+                        }
+                        else
+                        {
+                            for (int np = 0; np < numP; np++)
+                            {
+                                points[np] = new point();
+                                points[np].ExtLoad = ExtLoadType.none;
+                            }
                         }
                         points[Convert.ToInt32(strload[1])].ExtLoad = ExtLoad.getPoint(strload[2]);
                         sr.Close();
@@ -175,21 +190,22 @@ namespace mechanic
                             //plot.dt = dtExt;
                             //plot.time = time;
                             //plot.coords = lstdispla;
-                            //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
-                            //plot.initControls();
-                            //plotxys.Add(plot);
-                            //plot = new plotxy();
-                            //plot.Show();
-                            //plot.dt = dtExt;
-                            //plot.time = time;
-                            //plot.coords = lstcoords;
-                            //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "x/t(coords)", "Time", "Y", false, System.Drawing.Color.Red);
+                            //plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
                             //plot.initControls();
                             //plotxys.Add(plot);
 
+                            plot = new plotxy();
+                            plot.Show();
+                            plot.dt = dtExt;
+                            plot.time = time;
+                            plot.coords = lstcoords;
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x/t(coords)", "Time", "Y", false, System.Drawing.Color.Red);
+                            plot.initControls();
+                            plotxys.Add(plot);
+
                             //plot = new plotxy();
                             //plot.Show();
-                            //plot.draw2d(axistype.t, axistype.x, lsta, time, numP - 1, 1, false, false, "a(x)", "t", "a");
+                            //plot.draw2d(axistype.t, axistype.x, lsta, time, numP, 1, false, false, "a(x)", "t", "a");
                             //plotxys.Add(plot);
 
                             //plot = new plotxy();
@@ -197,7 +213,7 @@ namespace mechanic
                             //plot.dt = dtExt;
                             //plot.time = time;
                             //plot.coords = lstv;
-                            //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "v(x)", "t", "v", false, System.Drawing.Color.Red);
+                            //plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(x)", "t", "v", false, System.Drawing.Color.Red);
                             //plot.initControls();
                             //plotxys.Add(plot);
                             if (Modeltype == Models.particle)
@@ -207,7 +223,7 @@ namespace mechanic
                                 //plot.dt = dtExt;
                                 //plot.time = time;
                                 //plot.coords = lstvAN;
-                                //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
+                                //plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
                                 //plot.initControls();
                                 //plotxys.Add(plot);
 
