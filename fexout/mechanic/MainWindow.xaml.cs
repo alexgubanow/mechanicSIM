@@ -17,7 +17,7 @@ namespace fexout
         //forcePoints[] myFPs;
         forceTypes forceType;
         forceCycleTypes forceCycle;
-        forceApps forceApp;
+        ExtLoadTypes ExtLoadType;
 
         public MainWindow()
         {
@@ -29,7 +29,7 @@ namespace fexout
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
-            comboBox_forceapp.ItemsSource = Enum.GetValues(typeof(forceApps));
+            comboBox_forceapp.ItemsSource = Enum.GetValues(typeof(ExtLoadTypes));
             comboBox_forceapp.SelectedIndex = 0;
             comboBox_forcetype.ItemsSource = Enum.GetValues(typeof(forceTypes));
             comboBox_forcetype.SelectedIndex = 0;
@@ -42,11 +42,11 @@ namespace fexout
             //lstFex = null;
             GC.Collect();
             ApplyEffect(this);
-            double freq = Convert.ToSingle(textBox_freq.Text.Replace('.',',')) * (double)Math.Pow(10, Convert.ToInt32(textBox_freqpop.Text.Replace('.', ',')));
-            double V0 = Convert.ToSingle(textBox_V0.Text.Replace('.', ',')) * (double)Math.Pow(10, Convert.ToInt32(textBox_V0pop.Text.Replace('.', ',')));
-            double k = Convert.ToSingle(textBox_k.Text.Replace('.', ',')) * (double)Math.Pow(10, Convert.ToInt32(textBox_kpop.Text.Replace('.', ',')));
-            int numot = Convert.ToInt32(Convert.ToInt32(textBox_numot.Text) * Math.Pow(10, Convert.ToInt32(textBox_numotpop.Text)));
-            double deltat = Convert.ToDouble(Convert.ToDouble(textBox_deltat.Text) * Math.Pow(10, Convert.ToInt32(textBox_deltatpop.Text)));
+            double freq = calc.StrPow(textBox_freq.Text, textBox_freqpop.Text);
+            double V0 = calc.StrPow(textBox_V0.Text, textBox_V0pop.Text);
+            double k = calc.StrPow(textBox_k.Text, textBox_kpop.Text);
+            int numot = calc.StrPowInt(textBox_numot.Text, textBox_numotpop.Text);
+            double deltat = calc.StrPow(textBox_deltat.Text, textBox_deltatpop.Text);
             
             string deffname = "";
             switch (forceType)
@@ -91,7 +91,7 @@ namespace fexout
             }
             deffname = deffname + "_dt=" + deltat.ToString("e") + "_numCounts=" + numot.ToString("e");
             forcePoints[] myFPs = new forcePoints[1] {
-                new forcePoints { nump = 0, Amp = V0, k = k, freq = freq, forceCycle = forceCycle, forceType = forceType, myforcePlaces = myforcePlaces, forceApp = forceApp }
+                new forcePoints { nump = 0, Amp = V0, k = k, freq = freq, forceCycle = forceCycle, forceType = forceType, myforcePlaces = myforcePlaces, ExtLoadType = ExtLoadType }
             };
             Thread thrdraw = new Thread(delegate ()
             {
@@ -155,7 +155,7 @@ namespace fexout
                 sw.WriteLine(dt);
                 for (int p = 0; p < myFPs.Length; p++)
                 {
-                    sw.WriteLine("loadstart" + ':' + '0' + ':' + myFPs[p].forceApp);
+                    sw.WriteLine("loadstart" + ':' + '0' + ':' + myFPs[p].ExtLoadType);
                     for (int i = 0; i < lstFex.Length; i++)
                     {
                         sw.WriteLine(lstFex[i][0][0].ToString() + ":" + lstFex[i][0][1].ToString() + ":" + lstFex[i][0][2].ToString());
@@ -200,7 +200,7 @@ namespace fexout
 
         private void comboBox_forceapp_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            forceApp = (forceApps)Enum.Parse(typeof(forceApps), e.AddedItems[0].ToString());
+            ExtLoadType = (ExtLoadTypes)Enum.Parse(typeof(ExtLoadTypes), e.AddedItems[0].ToString());
         }
     }
 }

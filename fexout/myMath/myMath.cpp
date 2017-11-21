@@ -18,12 +18,12 @@ namespace myMath
 		rev_mod_sin,
 		cos_x
 	};
-	public enum class forceApps
-	{
-		Displ,
-		Velos,
-		Acc,
-		Force
+	public enum class ExtLoadTypes {
+		none,
+		coords,
+		displ,
+		velos,
+		force
 	};
 	public enum class forceCycleTypes
 	{
@@ -48,7 +48,7 @@ namespace myMath
 		forcePlaces myforcePlaces;
 		forceCycleTypes forceCycle;
 		forceTypes forceType;
-		forceApps forceApp;
+		ExtLoadTypes ExtLoadType;
 	};
 	public ref class initArr
 	{
@@ -117,6 +117,14 @@ namespace myMath
 			}
 		}
 	public:
+		static double StrPow(String^ val, String^ pop)
+		{
+			return Convert::ToDouble(Convert::ToDouble(val) * pow(10, Convert::ToInt32(pop)));
+		};
+		static int StrPowInt(String^ val, String^ pop)
+		{
+			return Convert::ToInt32(Convert::ToInt32(val) * pow(10, Convert::ToInt32(pop)));
+		};
 		static void ExtLoad(array<forcePoints>^ myFPs, int numt, double dt, array<array<array<double>^>^>^ %lstFex)
 		{
 			array<double>^ tArr = gcnew array<double>(numt);

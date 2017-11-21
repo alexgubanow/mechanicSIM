@@ -1,28 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Threading;
 using System.Windows.Threading;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using ZedGraph;
-using System.Drawing;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.IO;
 using myMatch;
-using static myMatch.MainFuncs;
 
 namespace mechanic
 {
@@ -48,19 +33,7 @@ namespace mechanic
         AllowSinCos AllowSinCostype = AllowSinCos.no;
         MaterialModels MaterialModeltype = MaterialModels.normal;
         CalcTypes CalcType = CalcTypes.dynamical;
-
-        //double[] time;
-        //double[][][] lstF;
-        //double[][][] lstFem1;
-        //double[][][] lstFep1;
-        //double[][][] lsta;
-        //double[][][] lstv;
-        //double[][][] lstvAN;
-        //double[][][] lstdispla;
-        //double[][][] lstcoords;
-        //double[][][] lstb;
-        //MainFuncs.point[] points;
-
+        
         Thread thrdraw;
         enum MaterialsDB
         {
@@ -92,16 +65,7 @@ namespace mechanic
             comboBox_mater.SelectedIndex = 0;
             checkBoxIsconsole.IsChecked = IsConsoleOut;
         }
-
-        private void analytic(double Dp, double qp, double Viscos, double pp)
-        {
-
-        }
-
-        private void getAngular()
-        { }
-
-        
+                
         private void launchthr()
         {
             foreach (plotxy pl in plotxys)
@@ -109,21 +73,20 @@ namespace mechanic
             
             point[] points;
             GC.Collect();
-            double ro = get_val_pop(textBox_ro.Text, textBox_ropop.Text);
-            double L = get_val_pop(textBox_L.Text, textBox_Lpop.Text);
-            double h = get_val_pop(textBox_h.Text, textBox_hpop.Text);
-            double b = get_val_pop(textBox_b.Text, textBox_bpop.Text);
-            double D = get_val_pop(textBox_D.Text, textBox_Dpop.Text);
-            double v0 = get_val_pop(textBox_v0.Text, textBox_v0pop.Text);
-            double vamp = get_val_pop(textBox_vamp.Text, textBox_vamppop.Text);
+            double ro = calc.StrPow(textBox_ro.Text, textBox_ropop.Text);
+            double L = calc.StrPow(textBox_L.Text, textBox_Lpop.Text);
+            double h = calc.StrPow(textBox_h.Text, textBox_hpop.Text);
+            double b = calc.StrPow(textBox_b.Text, textBox_bpop.Text);
+            double D = calc.StrPow(textBox_D.Text, textBox_Dpop.Text);
+            double v0 = calc.StrPow(textBox_v0.Text, textBox_v0pop.Text);
+            double vamp = calc.StrPow(textBox_vamp.Text, textBox_vamppop.Text);
             int numP = Convert.ToInt32(textBox_numP.Text);
-            double elastic = get_val_pop(textBox_elas.Text, textBox_elaspop.Text);
-            double Re = get_val_pop(textBox_Renum.Text, textBox_Renumpop.Text);
+            double elastic = calc.StrPow(textBox_elas.Text, textBox_elaspop.Text);
+            double Re = calc.StrPow(textBox_Renum.Text, textBox_Renumpop.Text);
             string flname = textBox_file.Text;
             ApplyEffect(this);
             thrdraw = new Thread(delegate ()
             {
-                MainFuncs myfuncs = new MainFuncs();
                 if (flname != "")
                 {
                     //string[] strLoads = new string[1];
@@ -177,30 +140,30 @@ namespace mechanic
                             points[np] = new point();
                             points[np].ExtLoad = ExtLoadType.none;
                         }
-                        points[Convert.ToInt32(strload[1])].ExtLoad = myfuncs.get_pinfo(strload[2]);
+                        points[Convert.ToInt32(strload[1])].ExtLoad = ExtLoad.getPoint(strload[2]);
                         sr.Close();
                         fs.Close();
                         calc.t(countsExt, dtExt, ref time);                        
-                        initarr._1d(countsExt, numP, 3, ref lstF);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstdispla);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstcoords);
-                        myfuncs.initCoordsArr(L / numP, points, ref lstcoords);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstFem1);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstFep1);
-                        myfuncs.initarr(countsExt, numP, 3, ref lsta);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstv);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstvAN);
-                        myfuncs.initarr(countsExt, numP, 3, ref lstb);
+                        initArr._3d(numP, 3, ref lstF);
+                        initArr._3d( numP, 3, ref lstdispla);
+                        initArr._3d( numP, 3, ref lstcoords);
+                        initArr.Coords(L / numP, points, ref lstcoords);
+                        initArr._3d( numP, 3, ref lstFem1);
+                        initArr._3d( numP, 3, ref lstFep1);
+                        initArr._3d( numP, 3, ref lsta);
+                        initArr._3d( numP, 3, ref lstv);
+                        initArr._3d( numP, 3, ref lstvAN);
+                        initArr._3d( numP, 3, ref lstb);
                         
-                        if (CalcType == MainFuncs.CalcTypes.statical)
+                        if (CalcType == CalcTypes.statical)
                         {
-                            //myfuncs.calcMovementStatic(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype,
-                            //    L, A, Iz, ro, numP, countsExt, dtExt, elastic, v0,
-                            //    ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstv, ref lstdispla, ref lstcoords);
+                            calc.StaticMovement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
+                                L, b, h, ro, numP, countsExt, elastic, v0, vamp, D, Re, time,
+                                ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstb, ref lstv, ref lstdispla, ref lstcoords, ref lstvAN);
                         }
                         else
                         {
-                            myfuncs.calcMovement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
+                            calc.Movement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
                                 L, b, h, ro, numP, countsExt, elastic, v0, vamp, D, Re, time,
                                 ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstb, ref lstv, ref lstdispla, ref lstcoords, ref lstvAN);
                         }
@@ -212,7 +175,7 @@ namespace mechanic
                             //plot.dt = dtExt;
                             //plot.time = time;
                             //plot.coords = lstdispla;
-                            //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, numP - 1, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
+                            //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
                             //plot.initControls();
                             //plotxys.Add(plot);
                             //plot = new plotxy();
@@ -220,13 +183,13 @@ namespace mechanic
                             //plot.dt = dtExt;
                             //plot.time = time;
                             //plot.coords = lstcoords;
-                            //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, numP - 1, 1, false, false, "x/t(coords)", "Time", "Y", false, System.Drawing.Color.Red);
+                            //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "x/t(coords)", "Time", "Y", false, System.Drawing.Color.Red);
                             //plot.initControls();
                             //plotxys.Add(plot);
 
                             //plot = new plotxy();
                             //plot.Show();
-                            //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, lsta, time, numP - 1, 1, false, false, "a(x)", "t", "a");
+                            //plot.draw2d(axistype.t, axistype.x, lsta, time, numP - 1, 1, false, false, "a(x)", "t", "a");
                             //plotxys.Add(plot);
 
                             //plot = new plotxy();
@@ -234,17 +197,17 @@ namespace mechanic
                             //plot.dt = dtExt;
                             //plot.time = time;
                             //plot.coords = lstv;
-                            //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, numP - 1, 1, false, false, "v(x)", "t", "v", false, System.Drawing.Color.Red);
+                            //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "v(x)", "t", "v", false, System.Drawing.Color.Red);
                             //plot.initControls();
                             //plotxys.Add(plot);
-                            if (Modeltype == MainFuncs.Models.particle)
+                            if (Modeltype == Models.particle)
                             {
                                 //plot = new plotxy();
                                 //plot.Show();
                                 //plot.dt = dtExt;
                                 //plot.time = time;
                                 //plot.coords = lstvAN;
-                                //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, numP - 1, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
+                                //plot.draw2d(axistype.t, axistype.x, numP - 1, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
                                 //plot.initControls();
                                 //plotxys.Add(plot);
 
@@ -253,20 +216,20 @@ namespace mechanic
                                 plot.dt = dtExt;
                                 plot.time = time;
                                 plot.coords = lstvAN;
-                                plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, numP - 1, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plot.coords = lstv;
-                                plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, numP - 1, 1, false, false, "v(x)", "t", "v", true, System.Drawing.Color.Blue);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(x)", "t", "v", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
                             }
                             //plot = new plotxy();
                             //plot.Show();
-                            //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, lstF, time, numP, 1, false, false, "Ftot(x)", "t", "N");
+                            //plot.draw2d(axistype.t, axistype.x, lstF, time, numP, 1, false, false, "Ftot(x)", "t", "N");
                             //plotxys.Add(plot);
                             //plot = new plotxy();
                             //plot.Show();
-                            //plot.draw2d(MainFuncs.axistype.t, MainFuncs.axistype.x, lstFep1, time, numP, 1, false, false, "Fep1(x)", "t", "N");
+                            //plot.draw2d(axistype.t, axistype.x, lstFep1, time, numP, 1, false, false, "Fep1(x)", "t", "N");
                             //plotxys.Add(plot);
                         }));
                         ClearEffect(this);
@@ -281,11 +244,7 @@ namespace mechanic
             thrdraw.Start();
         }
 
-
-        private double get_val_pop(string val, string pop)
-        {
-            return Convert.ToDouble(Convert.ToDouble(val) * Math.Pow(10, Convert.ToInt32(pop)));
-        }
+        
         //private Int64 get_val_pop64(string val, string pop)
         //{
         //    return Convert.ToInt64(Convert.ToDouble(val) * Math.Pow(10, Convert.ToInt32(pop)));
@@ -341,61 +300,8 @@ namespace mechanic
                 sr.Close();
                 fs.Close();
             }
-        }
-               
-
-        private void radioButton_metal_Checked(object sender, RoutedEventArgs e)
-        {
-            textBox_numP.Text = 5.ToString();
-            textBox_ro.Text = 77.ToString();
-            textBox_ropop.Text = 2.ToString();
-            textBox_L.Text = 135.ToString();
-            textBox_Lpop.Text = (-4).ToString();
-            textBox_h.Text = 0.ToString();
-            textBox_hpop.Text = 0.ToString();
-            textBox_b.Text = 0.ToString();
-            textBox_bpop.Text = 0.ToString();
-            textBox_D.Text = 71.ToString();
-            textBox_Dpop.Text = (-5).ToString();
-            textBox_elas.Text = 215.ToString();
-            textBox_elaspop.Text = 9.ToString();
-        }
-
-        private void radioButton_chorda_Checked(object sender, RoutedEventArgs e)
-        {
-            textBox_numP.Text = 3.ToString();
-            textBox_ro.Text = 104.ToString();
-            textBox_ropop.Text = 1.ToString();
-            textBox_L.Text = 135.ToString();
-            textBox_Lpop.Text = (-4).ToString();
-            textBox_h.Text = 0.ToString();
-            textBox_hpop.Text = 0.ToString();
-            textBox_b.Text = 0.ToString();
-            textBox_bpop.Text = 0.ToString();
-            textBox_D.Text = 71.ToString();
-            textBox_Dpop.Text = (-5).ToString();
-            textBox_elas.Text = 5.ToString();
-            textBox_elaspop.Text = 8.ToString();
-        }
-
-        private void radioButton_artchorda_Checked(object sender, RoutedEventArgs e)
-        {
-            textBox_numP.Text = 5.ToString();
-            textBox_ro.Text = 220.ToString();
-            textBox_ropop.Text = 1.ToString();
-            textBox_L.Text = 135.ToString();
-            textBox_Lpop.Text = (-4).ToString();
-            textBox_h.Text = 0.ToString();
-            textBox_hpop.Text = 0.ToString();
-            textBox_b.Text = 0.ToString();
-            textBox_bpop.Text = 0.ToString();
-            textBox_D.Text = 15.ToString();
-            textBox_Dpop.Text = (-5).ToString();
-            textBox_elas.Text = 75.ToString();
-            textBox_elaspop.Text = 8.ToString();
-        }
+        }              
         
-
         private void radioButton_sinyes_Checked(object sender, RoutedEventArgs e)
         {
             AllowSinCostype = AllowSinCos.yes;
@@ -431,12 +337,12 @@ namespace mechanic
 
         private void radioButton_normalmod_Checked(object sender, RoutedEventArgs e)
         {
-            MaterialModeltype = MainFuncs.MaterialModels.normal;
+            MaterialModeltype = MaterialModels.normal;
         }
 
         private void radioButton_n0mod_Checked(object sender, RoutedEventArgs e)
         {
-            MaterialModeltype = MainFuncs.MaterialModels.n0;
+            MaterialModeltype = MaterialModels.n0;
         }
         
         private void btn_abrt_Click(object sender, RoutedEventArgs e)
@@ -448,12 +354,12 @@ namespace mechanic
 
         private void radioButton_dynamic_Checked(object sender, RoutedEventArgs e)
         {
-            CalcType = MainFuncs.CalcTypes.dynamical;
+            CalcType = CalcTypes.dynamical;
         }
 
         private void radioButton_static_Checked(object sender, RoutedEventArgs e)
         {
-            CalcType = MainFuncs.CalcTypes.statical;
+            CalcType = CalcTypes.statical;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -464,12 +370,12 @@ namespace mechanic
         
         private void comboBox_integr_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            IntegShematype = (MainFuncs.IntegrSchems)Enum.Parse(typeof(MainFuncs.IntegrSchems), e.AddedItems[0].ToString());
+            IntegShematype = (IntegrSchems)Enum.Parse(typeof(IntegrSchems), e.AddedItems[0].ToString());
         }
         
         private void comboBox_models_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Modeltype = (MainFuncs.Models)Enum.Parse(typeof(MainFuncs.Models), e.AddedItems[0].ToString());
+            Modeltype = (Models)Enum.Parse(typeof(Models), e.AddedItems[0].ToString());
             if (Modeltype == Models.particle)
             {
                 comboRe.Visibility = Visibility.Visible;
@@ -545,7 +451,7 @@ namespace mechanic
                     textBox_elaspop.Text = 8.ToString();
                     break;
                 case MaterialsDB.glassPart:
-                    textBox_numP.Text = 2.ToString();
+                    textBox_numP.Text = 1.ToString();
                     textBox_ro.Text = 24.ToString();
                     textBox_ropop.Text = 2.ToString();
                     textBox_L.Text = 8.ToString();
@@ -567,17 +473,7 @@ namespace mechanic
         {
             AllowSinCostype = (bool)checkBoxIscos.IsChecked ? AllowSinCos.yes : AllowSinCos.no;
         }
-
-        private void radioButtonFile_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void radioButtonFormula_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
+        
         private void checkBoxIsconsole_Checked(object sender, RoutedEventArgs e)
         {
             IsConsoleOut = (bool)checkBoxIsconsole.IsChecked;

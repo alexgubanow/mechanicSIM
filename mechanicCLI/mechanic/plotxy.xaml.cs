@@ -1,27 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using ZedGraph;
-//using HelixToolkit.Wpf;
-using System.Windows.Media.Media3D;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Threading;
 using myMatch;
-using FFTWSharp;
-using System.IO;
+//using FFTWSharp;
 
 namespace mechanic
 {
@@ -38,9 +23,9 @@ namespace mechanic
 
         public double maxOnStart, maxOnEnd, minOnStart, minOnEnd;
 
-        IntPtr pin, pout;
-        float[] fin, fout;
-        public IntPtr fplan1;
+        //IntPtr pin, pout;
+        //float[] fin, fout;
+        //public IntPtr fplan1;
 
         [DllImport("shlwapi.dll")]
         static extern int ColorHLSToRGB(int H, int L, int S);
@@ -105,7 +90,7 @@ namespace mechanic
             }
         }
 
-        public void draw2d(MainFuncs.axistype xaxis, MainFuncs.axistype yaxis, int numP, int step,
+        public void draw2d(axistype xaxis, axistype yaxis, int numP, int step,
             bool xzeroline, bool yzeroline, string title, string xtitle, string ytitle, bool isAdd, System.Drawing.Color clrCurve)
         {
             GraphPane pane = mainPlot.GraphPane;
@@ -124,23 +109,23 @@ namespace mechanic
                 double[][] lstpp = new double[2][];
                 switch (xaxis)
                 {
-                    case MainFuncs.axistype.t:
+                    case axistype.t:
                         double[] yt = new double[time.Length];
                         for (int i = 0; i < time.Length; i++)
                         {
                             switch (yaxis)
                             {
-                                case MainFuncs.axistype.x:
+                                case axistype.x:
                                     yt[i] = coords[i][np][0];
                                     break;
-                                case MainFuncs.axistype.y:
+                                case axistype.y:
                                     yt[i] = coords[i][np][1];
                                     break;
                             }
                         }
                         lstpp = new double[2][] { time, yt };
                         break;
-                    case MainFuncs.axistype.x:
+                    case axistype.x:
                         double[] xx = new double[time.Length];
                         double[] xy = new double[time.Length];
                         for (int i = 0; i < time.Length; i++)
@@ -153,7 +138,7 @@ namespace mechanic
                         //ACurve = pane.AddCurve("p" + np.ToString(), xx,xy, System.Drawing.Color.Red, SymbolType.None);
                         //FCurve.Line.Width = 2f;
                         break;
-                    case MainFuncs.axistype.y:
+                    case axistype.y:
                         double[] yx = new double[time.Length];
                         double[] yy = new double[time.Length];
                         for (int i = 0; i < time.Length; i++)
@@ -411,60 +396,60 @@ namespace mechanic
 
         private void drawFFT(double[] time, double[][][] coords, double dt, int startP, int endP)
         {
-            int n = endP - startP;
-            //int n = time.Length;
-            // create two unmanaged arrays, properly aligned
-            pin = fftwf.malloc(n * 8);
-            pout = fftwf.malloc(n * 8);
+            //int n = endP - startP;
+            ////int n = time.Length;
+            //// create two unmanaged arrays, properly aligned
+            //pin = fftwf.malloc(n * 8);
+            //pout = fftwf.malloc(n * 8);
 
-            // create two managed arrays, possibly misalinged
-            // n*2 because we are dealing with complex numbers
-            fin = new float[n * 2];
-            fout = new float[n * 2];
-            int k = startP;
-            for (int i = 0; i < n; i++)
-            {
-                fin[i * 2] = (float)coords[k][0][0];
-                fin[i * 2 + 1] = 0;
-                k++;
-            }
-            // copy managed arrays to unmanaged arrays
-            Marshal.Copy(fin, 0, pin, n * 2);
-            Marshal.Copy(fout, 0, pout, n * 2);
-
-            fplan1 = fftwf.dft_1d(n, pin, pout, fftw_direction.Forward, fftw_flags.Estimate);
-            fftwf.execute(fplan1);
-
-            Marshal.Copy(pout, fout, 0, n * 2);
-
-            //if (!File.Exists("wisdom.wsd"))
+            //// create two managed arrays, possibly misalinged
+            //// n*2 because we are dealing with complex numbers
+            //fin = new float[n * 2];
+            //fout = new float[n * 2];
+            //int k = startP;
+            //for (int i = 0; i < n; i++)
             //{
-            //    fftwf.export_wisdom_to_filename("wisdom.wsd");
+            //    fin[i * 2] = (float)coords[k][0][0];
+            //    fin[i * 2 + 1] = 0;
+            //    k++;
             //}
-            // it is essential that you call these after finishing
-            // that's why they're in the destructor. See Also: RAII
-            fftwf.free(pin);
-            fftwf.free(pout);
-            fftwf.destroy_plan(fplan1);
-            double[] freqXArr = new double[fout.Length / 2];
-            double[] freqYArr = new double[fout.Length / 2];
+            //// copy managed arrays to unmanaged arrays
+            //Marshal.Copy(fin, 0, pin, n * 2);
+            //Marshal.Copy(fout, 0, pout, n * 2);
 
-            for (int i = 1; i < fout.Length / 2; i++)
-            {
-                freqXArr[i] = freqXArr[i - 1] + ((1 / dt) / 2) / (freqYArr.Length - 1);
-                freqYArr[i] = Math.Abs(fout[i]);
-            }
-            double maxf = 0;
-            int maxfi = 0;
-            for (int i = 1; i < freqYArr.Length; i++)
-            {
-                if (freqYArr[i] > maxf)
-                {
-                    maxf = freqYArr[i];
-                    maxfi = i;
-                }
-            }
-            calcFreqTextbox.Text = freqXArr[maxfi].ToString();
+            //fplan1 = fftwf.dft_1d(n, pin, pout, fftw_direction.Forward, fftw_flags.Estimate);
+            //fftwf.execute(fplan1);
+
+            //Marshal.Copy(pout, fout, 0, n * 2);
+
+            ////if (!File.Exists("wisdom.wsd"))
+            ////{
+            ////    fftwf.export_wisdom_to_filename("wisdom.wsd");
+            ////}
+            //// it is essential that you call these after finishing
+            //// that's why they're in the destructor. See Also: RAII
+            //fftwf.free(pin);
+            //fftwf.free(pout);
+            //fftwf.destroy_plan(fplan1);
+            //double[] freqXArr = new double[fout.Length / 2];
+            //double[] freqYArr = new double[fout.Length / 2];
+
+            //for (int i = 1; i < fout.Length / 2; i++)
+            //{
+            //    freqXArr[i] = freqXArr[i - 1] + ((1 / dt) / 2) / (freqYArr.Length - 1);
+            //    freqYArr[i] = Math.Abs(fout[i]);
+            //}
+            //double maxf = 0;
+            //int maxfi = 0;
+            //for (int i = 1; i < freqYArr.Length; i++)
+            //{
+            //    if (freqYArr[i] > maxf)
+            //    {
+            //        maxf = freqYArr[i];
+            //        maxfi = i;
+            //    }
+            //}
+            //calcFreqTextbox.Text = freqXArr[maxfi].ToString();
 
 
             //GraphPane paneFFT = plotFFT.GraphPane;

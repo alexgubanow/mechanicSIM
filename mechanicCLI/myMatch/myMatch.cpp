@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #define _USE_MATH_DEFINES
 #include <math.h>  
-
+#include <typeinfo> 
 #using <system.dll> 
 #using <mscorlib.dll>
 using namespace std;
@@ -11,182 +11,39 @@ using namespace System::IO;
 namespace myMatch
 {
 	static const double um = 0.0000183;
-	enum class axistype { x, y, z, t };
-	enum class IntegrSchems { 
+	public enum class axistype { x, y, z, t };
+	public enum class IntegrSchems {
 		euler, 
 		verlet,
 		gear
 	};
-	enum class Models { 
+	public enum class Models {
 		liner,
 		moonriv,
 		particle
 	};
-	enum class Retypes { stat, dyn };
-	enum class ExtLoadType { none, coords, displ, velos, force };
-	enum class ForcePlace { x, y, xy };
-	enum class AllowSinCos { yes, no };
-	enum class MaterialModels { normal, n0 };
-	enum class PointFreedom { full, locked };
-	enum class CalcTypes { statical, dynamical };
-	value struct point
+	public enum class Retypes { stat, dyn };
+	public enum class ExtLoadType { 
+		none,
+		coords,
+		displ,
+		velos, 
+		force 
+	};
+	public enum class ForcePlace { x, y, xy };
+	public enum class AllowSinCos { yes, no };
+	public enum class MaterialModels { normal, n0 };
+	public enum class PointFreedom { full, locked };
+	public enum class CalcTypes { statical, dynamical };
+	public value struct point
 	{
 		ExtLoadType ExtLoad;
 		PointFreedom pfreedom;
 	};
-	public ref struct MainFuncs
+	public ref class initArr
 	{
-		int readlarge()
-		{
-			String^ path = L"F:\\MyTestFile0.txt";
-
-			try
-			{
-				if (File::Exists(path))
-				{
-					File::Delete(path);
-				}
-
-				//Console::WriteLine(L"Writing some text to {0}", path);
-				StreamWriter^ sw = gcnew StreamWriter(path);
-				sw->WriteLine("Thiqwsqs");
-				sw->WriteLine("is some text");
-				sw->WriteLine("written to test");
-				sw->WriteLine("for reading...");
-				sw->Close();
-
-				//Console::WriteLine("Reading the previously written text..");
-				FileStream^ fs = gcnew FileStream(path, FileMode::Open);
-				StreamReader^ sr = gcnew StreamReader(fs);
-
-				while (sr->Peek() >= 0)
-				{
-					Console::WriteLine(sr->ReadLine());
-				}
-			}
-			catch (Exception^ e)
-			{
-				Console::WriteLine("The process failed: {0}", e->ToString());
-				return 1;
-			}
-			return 0;
-		};
-
-	public:	
-
-		int getExtStr(String^ fileName, array<String^>^ %strLoad)
-		{
-			try
-			{
-				String^ delimStr = "\n";
-				array<Char>^ delimiter = delimStr->ToCharArray();
-				StreamReader^ din = File::OpenText(fileName);
-				String^ outstr = din->ReadToEnd();
-				strLoad = outstr->Split(delimiter);
-			}
-			catch (Exception^ e)
-			{
-				if (dynamic_cast<FileNotFoundException^>(e))
-					return 404;
-				//Console::WriteLine("file '{0}' not found", fileName);
-				else
-					return 1;
-				//Console::WriteLine("problem reading file '{0}'", fileName);
-			}
-			return 0;
-		};
-		int getnumExtLoad(array<String^>^ strLoad, array<int>^ %findIndex)
-		{
-			String^ numLoad = "";
-			for (int i = 0; i < strLoad->Length; i++)
-			{
-				if (strLoad[i]->Contains("loadstart:"))
-				{
-					if (numLoad != "")
-					{
-						numLoad = numLoad + ":" + i.ToString();
-					}
-					else
-					{
-						numLoad = i.ToString();
-					}
-				}
-			}
-			array<String^>^ arrnumLoad = numLoad->Split(':');
-			findIndex = gcnew array<int>(arrnumLoad->Length);
-			for (int i = 0; i < arrnumLoad->Length; i++)
-			{
-				findIndex[i] = Convert::ToInt32(arrnumLoad[i]);
-			}
-			return 0;
-		};
-		int getExtLoad(array<String^>^ strLoad, array<int>^ findIndex, int counts, array<point>^ %points, array<array<array<double>^>^>^ %arrLoad)
-		{
-			for (int ifi = 0; ifi < findIndex->Length; ifi++)
-			{
-				array<String^>^ currLoad = strLoad[findIndex[ifi]]->Split(':');
-				int numberp = Convert::ToInt32(currLoad[1]);
-				points[numberp].ExtLoad = get_pinfo(currLoad[2]);
-				arrLoad[numberp] = gcnew array<array<double>^>(counts);
-				int it = 1;
-				while (strLoad[findIndex[ifi] + it] != "loadend")
-				{
-					array<String^>^ arraystr = strLoad[findIndex[ifi] + it]->Split(':');
-					arrLoad[numberp][it - 1] = gcnew array<double> { Convert::ToDouble(arraystr[0]), Convert::ToDouble(arraystr[1]), Convert::ToDouble(arraystr[2]) };
-					it++;
-				}
-			}
-			return 0;
-		};
-		ExtLoadType get_pinfo(String^ ExtIn)
-		{
-			if (ExtIn == "coords")
-			{
-				return ExtLoadType::coords;
-			}
-			else if (ExtIn == "displ")
-			{
-				return ExtLoadType::displ;
-			}
-			else if (ExtIn == "force")
-			{
-				return ExtLoadType::force;
-			}
-			else
-			{
-				return ExtLoadType::none;
-			}
-		}
-		int putExtLoad(double l, array<array<array<double>^>^>^ arrLoad, array<point>^ points, array<array<array<double>^>^>^ %arrF, array<array<array<double>^>^>^ %arrdispl, array<array<array<double>^>^>^ %arrcoords)
-		{
-			for (int i = 0; i < arrF->Length; i++)
-			{
-				for (int np = 0; np < points->Length; np++)
-				{
-					if (np != 0)
-					{
-						arrcoords[i][np][0] = arrcoords[i][np - 1][0] + l;
-					}
-					switch (points[np].ExtLoad)
-					{
-					case ExtLoadType::coords:
-						for (int j = 0; j < arrcoords[i][np]->Length; j++)
-						{
-							arrcoords[i][np][j] = arrcoords[i][np][j] + arrLoad[np][i][j];
-						}
-						break;
-					case ExtLoadType::displ:
-						arrdispl[i][np] = arrLoad[np][i];
-						break;
-					case ExtLoadType::force:
-						arrF[i][np] = arrLoad[np][i];
-						break;
-					}
-				}
-			}
-			return 0;
-		};
-		int initCoordsArr(double l, array<point>^ points, array<array<array<double>^>^>^ %arrcoords)
+	public:
+		static void Coords(double l, array<point>^ points, array<array<array<double>^>^>^ %arrcoords)
 		{
 			for (int i = 0; i < arrcoords->Length; i++)
 			{
@@ -198,44 +55,25 @@ namespace myMatch
 					}
 				}
 			}
-			return 0;
 		};
-			int saveStrFile(String^ fileName, String^ str)
+		static void _1d(int x, array<double>^ %arr)
+		{
+			arr = gcnew array<double>(x);
+		};
+		static void _3d(int y, int z, array<array<array<double>^>^>^ %arr)
+		{
+			//arr = gcnew array<array<array<double>^>^>(x);
+			for (int i = 0; i < arr->Length; i++)
 			{
-				try
+				arr[i] = gcnew array<array<double>^>(y);
+				for (int np = 0; np < y; np++)
 				{
-					File::WriteAllText(fileName, str);
+					arr[i][np] = gcnew array<double>(z);
 				}
-				catch (Exception^ e)
-				{
-					if (dynamic_cast<FileNotFoundException^>(e))
-						return 404;
-					//Console::WriteLine("file '{0}' not found", fileName);
-					else
-						return 1;
-					//Console::WriteLine("problem reading file '{0}'", fileName);
-				}
-				return 0;
-			};
-			int saveStrFile(String^ fileName, array<String^>^ str)
-			{
-				try
-				{
-					File::WriteAllLines(fileName, str);
-				}
-				catch (Exception^ e)
-				{
-					if (dynamic_cast<FileNotFoundException^>(e))
-						return 404;
-					//Console::WriteLine("file '{0}' not found", fileName);
-					else
-						return 1;
-					//Console::WriteLine("problem reading file '{0}'", fileName);
-				}
-				return 0;
-			};
-	};
-	ref class CosMatrix
+			}
+		};
+	};	
+	public ref class CosMatrix
 	{
 	public:
 		static double get_lij(array<double>^ x, array<double>^ xp1)
@@ -274,7 +112,7 @@ namespace myMatch
 				Ux[0] * a3[0] + Ux[1] * a3[1] + Ux[2] * a3[2] };
 		}*/
 	};
-	ref class ForceCalcs
+	public ref class ForceCalcs
 	{
 	public:
 		static int metal(array<double>^ currUxi, array<double>^ lastUxi, array<double>^ currUxi1, array<double>^ lastUxi1,
@@ -358,7 +196,7 @@ namespace myMatch
 		static const double C01 = -23512872.8;
 		static const double C10 = 22956961.3;
 	};
-	ref class Integration
+	public ref class Integration
 	{
 	public:
 		static int get_xvab_from_coords(array<double>^ newcoords, array<double>^ lastcoords,
@@ -519,13 +357,17 @@ namespace myMatch
 	};
 	public ref class calc
 	{
-		int strtoLoad(String^ str, array<double>^ %Load)
+		static int strtoLoad(String^ str, array<double>^ %Load)
 		{
 			array<String^>^ arrastr = str->Split(':');
 			Load = gcnew array<double>(3) { Convert::ToDouble(arrastr[0]), Convert::ToDouble(arrastr[1]), Convert::ToDouble(arrastr[2]) };
 			return 0;
 		};
 	public:
+		static double StrPow(String^ val, String^ pop)
+		{
+			return Convert::ToDouble(Convert::ToDouble(val) * pow(10, Convert::ToInt32(pop)));
+		};
 		static void t(int numt, double dt, array<double>^ %t)
 		{
 			//t = gcnew array<double>(numt);
@@ -535,7 +377,7 @@ namespace myMatch
 				t[i] = t[i - 1] + dt;
 			}
 		};
-		int Movement(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype, Retypes Retype, bool IsConsoleOut,
+		static void Movement(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype, Retypes Retype, bool IsConsoleOut,
 			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double const v0, double const vamp, double const D, double const Renum, array<double>^ time,
 			array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
 			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords, array<array<array<double>^>^>^ %lstvAN)
@@ -572,7 +414,7 @@ namespace myMatch
 			StreamReader^ sr = gcnew StreamReader(fs);
 			array<array<array<double>^>^>^ Vm = gcnew array<array<array<double>^>^>(time->Length);
 			initArr::_3d(numP, 3, Vm);
-
+			
 			for (int linenum = 0; linenum < 4; linenum++)
 			{
 				sr->ReadLine();
@@ -594,27 +436,24 @@ namespace myMatch
 					{
 						massa = ro * A;
 					}
-
-					if (points[np].ExtLoad != ExtLoadType::none)
+					switch (points[np].ExtLoad)
 					{
-						switch (points[np].ExtLoad)
-						{
-						case ExtLoadType::coords:
-							lstcoords[i][np][0] = lstcoords[i][np][0] + Load[0];
-							lstcoords[i][np][1] = lstcoords[i][np][1] + Load[1];
-							lstcoords[i][np][2] = lstcoords[i][np][2] + Load[2];
-							break;
-						case ExtLoadType::displ:
-							lstdispla[i][np] = Load;
-							break;
-						case ExtLoadType::velos:
-							Vm[i][np] = Load;
-							break;
-						case ExtLoadType::force:
-							lstF[i][np] = Load;
-							break;
-						}
+					case ExtLoadType::coords:
+						lstcoords[i][np][0] = lstcoords[i][np][0] + Load[0];
+						lstcoords[i][np][1] = lstcoords[i][np][1] + Load[1];
+						lstcoords[i][np][2] = lstcoords[i][np][2] + Load[2];
+						break;
+					case ExtLoadType::displ:
+						lstdispla[i][np] = Load;
+						break;
+					case ExtLoadType::velos:
+						Vm[i][np] = Load;
+						break;
+					case ExtLoadType::force:
+						lstF[i][np] = Load;
+						break;
 					}
+
 					switch (points[np].ExtLoad)
 					{
 					case ExtLoadType::coords:
@@ -658,8 +497,6 @@ namespace myMatch
 
 					array<double>^ Re = gcnew array < double >(3);
 					array<double>^ Venv = gcnew array < double >(3);
-					array<double>^ currUx = lstdispla[i][np];
-					array<double>^ lastUx = lstdispla[i - 1][np];
 
 					if (model == Models::particle && predictor)
 					{
@@ -710,69 +547,39 @@ namespace myMatch
 					switch (model)
 					{
 					case Models::liner:
-						if (np == 0)
+						ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
+						switch (MaterialModeltype)
 						{
-							//l = Math.Sqrt(pow2(lstcoords[i][np][0] - lstcoords[i][np + 1][0]) - pow2(lstcoords[i][np][1] - lstcoords[i][np + 1][1]));
-							ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
+						case MaterialModels::n0:
+							if (lstFem1[i][np][0] < 0)
+							{
+								lstFem1[i][np][0] = 0;
+							}
+							break;
 						}
-						else if (np == numP - 1)
-						{
-							//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
-						}
-						else
-						{
-							ForceCalcs::metal(lstcoords[i][np], lstcoords[i - 1][np], Iz, A, l, elastic, lstFep1[i][np]);
-							lstFem1[i][np][0] = 0 - lstFep1[i][np - 1][0];
-							lstFem1[i][np][1] = 0 - lstFep1[i][np - 1][1];
-						}
+						lstF[i][np][0] = lstF[i][np][0] + lstFem1[i][np][0] + lstFep1[i][np][0];
+						lstF[i][np][1] = lstF[i][np][1] + lstFem1[i][np][1] + lstFep1[i][np][1];
+						lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
 						break;
 					case Models::moonriv:
-						if (np == 0)
+						ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
+						switch (MaterialModeltype)
 						{
-							//l = Math.Sqrt(pow2(lstcoords[i][np][0] - lstcoords[i][np + 1][0]) - pow2(lstcoords[i][np][1] - lstcoords[i][np + 1][1]));
-							ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
+						case MaterialModels::n0:
+							if (lstFem1[i][np][0] < 0)
+							{
+								lstFem1[i][np][0] = 0;
+							}
+							break;
 						}
-						else if (np == numP - 1)
-						{
-							//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
-						}
-						else
-						{
-							ForceCalcs::chorda(lstcoords[i][np], lstcoords[i - 1][np], A, l, lstFep1[i][np]);
-							lstFem1[i][np][0] = 0 - lstFep1[i][np - 1][0];
-							lstFem1[i][np][1] = 0 - lstFep1[i][np - 1][1];
-						}
+						lstF[i][np][0] = lstF[i][np][0] + lstFem1[i][np][0] + lstFep1[i][np][0];
+						lstF[i][np][1] = lstF[i][np][1] + lstFem1[i][np][1] + lstFep1[i][np][1];
+						lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
 						break;
 					case Models::particle:
-						if (np == 0)
-						{
-							ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstFep1[i][np]);
-						}
-						else if (np == numP - 1)
-						{
-							ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstFep1[i][np]);
-						}
-						else
-						{
-							ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstFep1[i][np]);
-						}
+						ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstF[i][np]);
 						break;
-					default:
-						break;
-					}
-
-					switch (MaterialModeltype)
-					{
-					case MaterialModels::n0:
-						if (lstFem1[i][np][0] < 0)
-						{
-							lstFem1[i][np][0] = 0;
-						}
-						break;
-					}
-					lstF[i][np][0] = lstF[i][np][0] + lstFem1[i][np][0] + lstFep1[i][np][0];
-					lstF[i][np][1] = lstF[i][np][1] + lstFem1[i][np][1] + lstFep1[i][np][1];
-					lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
+					}					
 					if (np == numP - 1)
 					{
 						//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
@@ -786,9 +593,8 @@ namespace myMatch
 			}
 			sr->Close();
 			fs->Close();
-			return 0;
 		};
-		int StaticMovement(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype, Retypes Retype, bool IsConsoleOut,
+		static void StaticMovement(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype, Retypes Retype, bool IsConsoleOut,
 			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double const v0, double const vamp, double const D, double const Renum, array<double>^ time,
 			array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
 			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords, array<array<array<double>^>^>^ %lstvAN)
@@ -1065,28 +871,195 @@ namespace myMatch
 			}
 			sr->Close();
 			fs->Close();
-			return 0;
 		};
 	};
-	public ref class initArr
+	public ref class ExtLoad
 	{
 	public:
-		static void _1d(int x, array<double>^ %arr)
+		static ExtLoadType getPoint(String^ ExtIn)
 		{
-			arr = gcnew array<double>(x);
-		};
-		static void _3d(int y, int z, array<array<array<double>^>^>^ %arr)
-		{
-			//arr = gcnew array<array<array<double>^>^>(x);
-			for (int i = 0; i < arr->Length; i++)
+			if (ExtIn == "coords")
 			{
-				arr[i] = gcnew array<array<double>^>(y);
-				for (int np = 0; np < y; np++)
-				{
-					arr[i][np] = gcnew array<double>(z);
-				}
+				return ExtLoadType::coords;
 			}
-		};
-	};
+			else if (ExtIn == "displ")
+			{
+				return ExtLoadType::displ;
+			}
+			else if (ExtIn == "force")
+			{
+				return ExtLoadType::force;
+			}
+			else if (ExtIn == "velos")
+			{
+				return ExtLoadType::velos;
+			}
+			else
+			{
+				return ExtLoadType::none;
+			}
+		}
+		/*
+		//int readlarge()
+		//{
+		//	String^ path = L"F:\\MyTestFile0.txt";
 
+		//	try
+		//	{
+		//		if (File::Exists(path))
+		//		{
+		//			File::Delete(path);
+		//		}
+
+		//		//Console::WriteLine(L"Writing some text to {0}", path);
+		//		StreamWriter^ sw = gcnew StreamWriter(path);
+		//		sw->WriteLine("Thiqwsqs");
+		//		sw->WriteLine("is some text");
+		//		sw->WriteLine("written to test");
+		//		sw->WriteLine("for reading...");
+		//		sw->Close();
+
+		//		//Console::WriteLine("Reading the previously written text..");
+		//		FileStream^ fs = gcnew FileStream(path, FileMode::Open);
+		//		StreamReader^ sr = gcnew StreamReader(fs);
+
+		//		while (sr->Peek() >= 0)
+		//		{
+		//			Console::WriteLine(sr->ReadLine());
+		//		}
+		//	}
+		//	catch (Exception^ e)
+		//	{
+		//		Console::WriteLine("The process failed: {0}", e->ToString());
+		//		return 1;
+		//	}
+		//	return 0;
+		//};
+		//static int getStr(String^ fileName, array<String^>^ %strLoad)
+		//{
+		//	try
+		//	{
+		//		String^ delimStr = "\n";
+		//		array<Char>^ delimiter = delimStr->ToCharArray();
+		//		StreamReader^ din = File::OpenText(fileName);
+		//		String^ outstr = din->ReadToEnd();
+		//		strLoad = outstr->Split(delimiter);
+		//	}
+		//	catch (Exception^ e)
+		//	{
+		//		if (dynamic_cast<FileNotFoundException^>(e))
+		//			return 404;
+		//		//Console::WriteLine("file '{0}' not found", fileName);
+		//		else
+		//			return 1;
+		//		//Console::WriteLine("problem reading file '{0}'", fileName);
+		//	}
+		//	return 0;
+		//};
+		//static void getNum(array<String^>^ strLoad, array<int>^ %findIndex)
+		//{
+		//	String^ numLoad = "";
+		//	for (int i = 0; i < strLoad->Length; i++)
+		//	{
+		//		if (strLoad[i]->Contains("loadstart:"))
+		//		{
+		//			if (numLoad != "")
+		//			{
+		//				numLoad = numLoad + ":" + i.ToString();
+		//			}
+		//			else
+		//			{
+		//				numLoad = i.ToString();
+		//			}
+		//		}
+		//	}
+		//	array<String^>^ arrnumLoad = numLoad->Split(':');
+		//	findIndex = gcnew array<int>(arrnumLoad->Length);
+		//	for (int i = 0; i < arrnumLoad->Length; i++)
+		//	{
+		//		findIndex[i] = Convert::ToInt32(arrnumLoad[i]);
+		//	}
+		//};
+		//static void getExtLoad(array<String^>^ strLoad, array<int>^ findIndex, int counts, array<point>^ %points, array<array<array<double>^>^>^ %arrLoad)
+		//{
+		//	for (int ifi = 0; ifi < findIndex->Length; ifi++)
+		//	{
+		//		array<String^>^ currLoad = strLoad[findIndex[ifi]]->Split(':');
+		//		int numberp = Convert::ToInt32(currLoad[1]);
+		//		points[numberp].ExtLoad = getPoint(currLoad[2]);
+		//		arrLoad[numberp] = gcnew array<array<double>^>(counts);
+		//		int it = 1;
+		//		while (strLoad[findIndex[ifi] + it] != "loadend")
+		//		{
+		//			array<String^>^ arraystr = strLoad[findIndex[ifi] + it]->Split(':');
+		//			arrLoad[numberp][it - 1] = gcnew array<double> { Convert::ToDouble(arraystr[0]), Convert::ToDouble(arraystr[1]), Convert::ToDouble(arraystr[2]) };
+		//			it++;
+		//		}
+		//	}
+		//};
+		//static int putExtLoad(double l, array<array<array<double>^>^>^ arrLoad, array<point>^ points, array<array<array<double>^>^>^ %arrF, array<array<array<double>^>^>^ %arrdispl, array<array<array<double>^>^>^ %arrcoords)
+		//{
+		//	for (int i = 0; i < arrF->Length; i++)
+		//	{
+		//		for (int np = 0; np < points->Length; np++)
+		//		{
+		//			if (np != 0)
+		//			{
+		//				arrcoords[i][np][0] = arrcoords[i][np - 1][0] + l;
+		//			}
+		//			switch (points[np].ExtLoad)
+		//			{
+		//			case ExtLoadType::coords:
+		//				for (int j = 0; j < arrcoords[i][np]->Length; j++)
+		//				{
+		//					arrcoords[i][np][j] = arrcoords[i][np][j] + arrLoad[np][i][j];
+		//				}
+		//				break;
+		//			case ExtLoadType::displ:
+		//				arrdispl[i][np] = arrLoad[np][i];
+		//				break;
+		//			case ExtLoadType::force:
+		//				arrF[i][np] = arrLoad[np][i];
+		//				break;
+		//			}
+		//		}
+		//	}
+		//	return 0;
+		//};
+		//int saveStrFile(String^ fileName, String^ str)
+		//{
+		//	try
+		//	{
+		//		File::WriteAllText(fileName, str);
+		//	}
+		//	catch (Exception^ e)
+		//	{
+		//		if (dynamic_cast<FileNotFoundException^>(e))
+		//			return 404;
+		//		//Console::WriteLine("file '{0}' not found", fileName);
+		//		else
+		//			return 1;
+		//		//Console::WriteLine("problem reading file '{0}'", fileName);
+		//	}
+		//	return 0;
+		//};
+		//static int saveStrFile(String^ fileName, array<String^>^ str)
+		//{
+		//	try
+		//	{
+		//		File::WriteAllLines(fileName, str);
+		//	}
+		//	catch (Exception^ e)
+		//	{
+		//		if (dynamic_cast<FileNotFoundException^>(e))
+		//			return 404;
+		//		//Console::WriteLine("file '{0}' not found", fileName);
+		//		else
+		//			return 1;
+		//		//Console::WriteLine("problem reading file '{0}'", fileName);
+		//	}
+		//	return 0;
+		//};
+		*/
+	};
 }

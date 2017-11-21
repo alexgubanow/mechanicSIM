@@ -73,6 +73,9 @@
     <Prefer32Bit>true</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>iconMechanicSIM.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="alglibnet2">
       <HintPath>.\alglibnet2.dll</HintPath>
@@ -173,6 +176,7 @@
     <Resource Include="License-LGPL.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="iconMechanicSIM.ico" />
     <Content Include="libfftw3-3.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
