@@ -430,11 +430,13 @@ namespace myMatch
 			for (int k = 0; k < numP; k++)
 			{
 				v0 = qPs * vamp * sin(-fiP);
-				lstF[0][k][0] = 2 * M_PI * um * D * (vamp - v0);
-				lsta[0][k][0] = lstF[0][k][0] / (ro * A);
+				lsta[0][k][0] = qPs * w * vamp * cos(-fiP);
+				lstaAN[0][k][0] = lsta[0][k][0];
+				lstF[0][k][0] = (ro * A) * lsta[0][k][0];
 				lstv[0][k][0] = v0;
 				lstvAN[0][k][0] = v0;
-				lstdispla[0][k][0] = - (qPs * vamp * cos(-fiP)) / w;
+				lstdispla[0][k][0] = - ((qPs * vamp ) / w ) * cos(-fiP);
+				lstdisplAN[0][k][0] = lstdispla[0][k][0];
 			}
 
 			for (int i = 1; i < counts; i++)

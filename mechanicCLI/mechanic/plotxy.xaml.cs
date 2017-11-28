@@ -97,8 +97,8 @@ namespace mechanic
             pane.Title.Text = title;
             pane.XAxis.Title.Text = xtitle;
             pane.YAxis.Title.Text = ytitle;
-            pane.XAxis.MajorGrid.IsZeroLine = xzeroline;
-            pane.YAxis.MajorGrid.IsZeroLine = yzeroline;
+            pane.XAxis.MajorGrid.IsZeroLine = yzeroline;
+            pane.YAxis.MajorGrid.IsZeroLine = xzeroline;
             pane.IsFontsScaled = false;
             if (!isAdd)
             {

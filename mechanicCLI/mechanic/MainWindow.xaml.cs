@@ -26,7 +26,7 @@ namespace mechanic
 
         public static List<plotxy> plotxys = new List<plotxy>();
 
-        bool IsConsoleOut = true;
+        bool IsConsoleOut = false;
         Models Modeltype = Models.liner;
         Retypes Retype = Retypes.stat;
         IntegrSchems IntegShematype = IntegrSchems.euler;
@@ -64,7 +64,7 @@ namespace mechanic
             comboBox_Re.SelectedIndex = 0;
             comboBox_mater.ItemsSource = Enum.GetValues(typeof(MaterialsDB));
             comboBox_mater.SelectedIndex = 0;
-            checkBoxIsconsole.IsChecked = IsConsoleOut;
+            //checkBoxIsconsole.IsChecked = IsConsoleOut;
         }
                 
         private void launchthr()
@@ -201,7 +201,7 @@ namespace mechanic
                             plot.dt = dtExt;
                             plot.time = time;
                             plot.coords = lstcoords;
-                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x(t)", "Time", "X", false, System.Drawing.Color.Red);
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "x(t)", "Time", "X", false, System.Drawing.Color.Red);
                             plot.initControls();
                             plotxys.Add(plot);
                             
@@ -212,10 +212,10 @@ namespace mechanic
                                 plot.dt = dtExt;
                                 plot.time = time;
                                 plot.coords = lstdisplAN;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "displAN(t)", "t", "displAN", false, System.Drawing.Color.Red);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "displAN(t)", "t", "displAN", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plot.coords = lstdispla;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "displ(t)", "t", "displ", true, System.Drawing.Color.Blue);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "displ(t)", "t", "displ", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
 
@@ -224,10 +224,10 @@ namespace mechanic
                                 plot.dt = dtExt;
                                 plot.time = time;
                                 plot.coords = lstvAN;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "vAN(t)", "t", "vAN", false, System.Drawing.Color.Red);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "vAN(t)", "t", "vAN", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plot.coords = lstv;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(t)", "t", "v", true, System.Drawing.Color.Blue);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "v(t)", "t", "v", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
 
@@ -236,10 +236,10 @@ namespace mechanic
                                 plot.dt = dtExt;
                                 plot.time = time;
                                 plot.coords = lstaAN;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "aAN(t)", "t", "aAN", false, System.Drawing.Color.Red);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "aAN(t)", "t", "aAN", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plot.coords = lsta;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "a(t)", "t", "a", true, System.Drawing.Color.Blue);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "a(t)", "t", "a", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
                             }
@@ -248,7 +248,7 @@ namespace mechanic
                             plot.dt = dtExt;
                             plot.time = time;
                             plot.coords = lstF;
-                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "Ftot(t)", "t", "N", true, System.Drawing.Color.Blue);
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "Ftot(t)", "t", "N", true, System.Drawing.Color.Blue);
                             plotxys.Add(plot);
                             plot = new plotxy();
                             //plot.Show();
@@ -389,6 +389,7 @@ namespace mechanic
         {
             foreach (plotxy pl in plotxys)
             { pl.Close(); }
+            Application.Current.Shutdown();
         }
         
         private void comboBox_integr_SelectionChanged(object sender, SelectionChangedEventArgs e)
