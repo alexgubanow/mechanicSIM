@@ -378,7 +378,7 @@ namespace myMatch
 			}
 		};
 		static void Movement(String^ flnameExtLoad, array<point>^ points, Models model, IntegrSchems shema, CalcTypes CalcType, MaterialModels MaterialModeltype, Retypes Retype, bool IsConsoleOut,
-			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double const v0, double const vamp, double const D, double const Renum, array<double>^ time,
+			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double v0, double const vamp, double const D, double const Renum, array<double>^ time,
 			array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
 			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords,
 			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN)
@@ -422,11 +422,21 @@ namespace myMatch
 			}
 			array<double>^ Load = gcnew array<double>(3);
 			//int countCycle = 0;
+			double w = 2 * M_PI * 3000;
+			double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
+			double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
+			double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
+			double fiP = Math::Atan(w * tauP);
 			for (int k = 0; k < numP; k++)
 			{
+				v0 = qPs * vamp * sin(-fiP);
+				lstF[0][k][0] = 2 * M_PI * um * D * (vamp - v0);
+				lsta[0][k][0] = lstF[0][k][0] / (ro * A);
 				lstv[0][k][0] = v0;
 				lstvAN[0][k][0] = v0;
+				//lstdispla[0][k][0] = (qPs * vamp * cos(-fiP)) / w;
 			}
+
 			for (int i = 1; i < counts; i++)
 			{
 				bool predictor = true;
@@ -518,10 +528,6 @@ namespace myMatch
 							}
 						}
 						//countCycle++;
-						double w = 2 * M_PI * 3000;
-						double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
-						double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
-						double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
 						double qP = 0;
 						if (Retype == Retypes::dyn)
 						{
@@ -532,7 +538,6 @@ namespace myMatch
 						{
 							qP = qPs;
 						}
-						double fiP = Math::Atan(w * tauP);
 						if (!isConsOut)
 						{
 							Console::WriteLine("massa = " + massa);

@@ -195,13 +195,13 @@ namespace mechanic
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             plotxy plot = new plotxy();
-                            //plot.Show();
-                            //plot.dt = dtExt;
-                            //plot.time = time;
-                            //plot.coords = lstdispla;
-                            //plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
-                            //plot.initControls();
-                            //plotxys.Add(plot);
+                            plot.Show();
+                            plot.dt = dtExt;
+                            plot.time = time;
+                            plot.coords = lstdispla;
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
+                            plot.initControls();
+                            plotxys.Add(plot);
 
                             plot = new plotxy();
                             plot.Show();
@@ -260,11 +260,14 @@ namespace mechanic
                                 plot.initControls();
                                 plotxys.Add(plot);
                             }
-                            //plot = new plotxy();
-                            //plot.Show();
-                            //plot.draw2d(axistype.t, axistype.x, lstF, time, numP, 1, false, false, "Ftot(x)", "t", "N");
-                            //plotxys.Add(plot);
-                            //plot = new plotxy();
+                            plot = new plotxy();
+                            plot.Show();
+                            plot.dt = dtExt;
+                            plot.time = time;
+                            plot.coords = lstF;
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "Ftot(x)", "t", "N", true, System.Drawing.Color.Blue);
+                            plotxys.Add(plot);
+                            plot = new plotxy();
                             //plot.Show();
                             //plot.draw2d(axistype.t, axistype.x, lstFep1, time, numP, 1, false, false, "Fep1(x)", "t", "N");
                             //plotxys.Add(plot);
