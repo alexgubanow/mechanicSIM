@@ -195,56 +195,39 @@ namespace mechanic
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             plotxy plot = new plotxy();
-                            plot.Show();
-                            plot.dt = dtExt;
-                            plot.time = time;
-                            plot.coords = lstdispla;
-                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x/t(displ)", "Time", "X", false, System.Drawing.Color.Red);
-                            plot.initControls();
-                            plotxys.Add(plot);
 
                             plot = new plotxy();
                             plot.Show();
                             plot.dt = dtExt;
                             plot.time = time;
                             plot.coords = lstcoords;
-                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x/t(coords)", "Time", "Y", false, System.Drawing.Color.Red);
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "x(t)", "Time", "X", false, System.Drawing.Color.Red);
                             plot.initControls();
                             plotxys.Add(plot);
-
-                            //plot = new plotxy();
-                            //plot.Show();
-                            //plot.draw2d(axistype.t, axistype.x, lsta, time, numP, 1, false, false, "a(x)", "t", "a");
-                            //plotxys.Add(plot);
-
-                            //plot = new plotxy();
-                            //plot.Show();
-                            //plot.dt = dtExt;
-                            //plot.time = time;
-                            //plot.coords = lstv;
-                            //plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(x)", "t", "v", false, System.Drawing.Color.Red);
-                            //plot.initControls();
-                            //plotxys.Add(plot);
+                            
                             if (Modeltype == Models.particle)
                             {
-                                //plot = new plotxy();
-                                //plot.Show();
-                                //plot.dt = dtExt;
-                                //plot.time = time;
-                                //plot.coords = lstvAN;
-                                //plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
-                                //plot.initControls();
-                                //plotxys.Add(plot);
+                                plot = new plotxy();
+                                plot.Show();
+                                plot.dt = dtExt;
+                                plot.time = time;
+                                plot.coords = lstdisplAN;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "displAN(t)", "t", "displAN", false, System.Drawing.Color.Red);
+                                plot.initControls();
+                                plot.coords = lstdispla;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "displ(t)", "t", "displ", true, System.Drawing.Color.Blue);
+                                plot.initControls();
+                                plotxys.Add(plot);
 
                                 plot = new plotxy();
                                 plot.Show();
                                 plot.dt = dtExt;
                                 plot.time = time;
                                 plot.coords = lstvAN;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "vAN(x)", "t", "vAN", false, System.Drawing.Color.Red);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "vAN(t)", "t", "vAN", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plot.coords = lstv;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(x)", "t", "v", true, System.Drawing.Color.Blue);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "v(t)", "t", "v", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
 
@@ -253,10 +236,10 @@ namespace mechanic
                                 plot.dt = dtExt;
                                 plot.time = time;
                                 plot.coords = lstaAN;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "aAN(x)", "t", "aAN", false, System.Drawing.Color.Red);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "aAN(t)", "t", "aAN", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plot.coords = lsta;
-                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "a(x)", "t", "a", true, System.Drawing.Color.Blue);
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "a(t)", "t", "a", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
                             }
@@ -265,7 +248,7 @@ namespace mechanic
                             plot.dt = dtExt;
                             plot.time = time;
                             plot.coords = lstF;
-                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "Ftot(x)", "t", "N", true, System.Drawing.Color.Blue);
+                            plot.draw2d(axistype.t, axistype.x, numP, 1, false, false, "Ftot(t)", "t", "N", true, System.Drawing.Color.Blue);
                             plotxys.Add(plot);
                             plot = new plotxy();
                             //plot.Show();
