@@ -572,6 +572,7 @@ namespace myMatch
 						else
 						{
 							Venv[0] = Vm[i][np][0];
+							lstdisplAN[i][np][0] = lstdisplAN[i][np][0] - ((qP * vamp) / w) * cos((w *  time[i]) - fiP);
 							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * sin((w *  time[i]) - fiP);
 							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * vamp * cos((w *  time[i]) - fiP) * w;
 						}
