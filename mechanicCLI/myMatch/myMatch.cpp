@@ -434,7 +434,7 @@ namespace myMatch
 				lsta[0][k][0] = lstF[0][k][0] / (ro * A);
 				lstv[0][k][0] = v0;
 				lstvAN[0][k][0] = v0;
-				//lstdispla[0][k][0] = (qPs * vamp * cos(-fiP)) / w;
+				lstdispla[0][k][0] = - (qPs * vamp * cos(-fiP)) / w;
 			}
 
 			for (int i = 1; i < counts; i++)
