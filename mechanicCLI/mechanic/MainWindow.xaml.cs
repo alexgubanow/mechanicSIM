@@ -136,6 +136,7 @@ namespace mechanic
                         double[][][] lstvAN = new double[countsExt][][];
                         double[][][] lstdisplAN = new double[countsExt][][];
                         double[][][] lstcoordsAN = new double[countsExt][][];
+                        double[][][] lstFAN = new double[countsExt][][];
 
                         strRead = sr.ReadLine();
                         double dtExt = Convert.ToDouble(strRead);
@@ -177,6 +178,7 @@ namespace mechanic
                         initArr._3d(numP, 3, ref lstvAN);
                         initArr._3d(numP, 3, ref lstdisplAN);
                         initArr._3d(numP, 3, ref lstcoordsAN);
+                        initArr._3d(numP, 3, ref lstFAN);
 
                         if (CalcType == CalcTypes.statical)
                         {
@@ -189,7 +191,7 @@ namespace mechanic
                             calc.Movement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
                                 L, b, h, ro, numP, countsExt, elastic, v0, vamp, D, Re, time,
                                 ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstb, ref lstv, ref lstdispla, ref lstcoords,
-                                ref lstaAN, ref lstvAN, ref lstdisplAN, ref lstcoordsAN);
+                                ref lstaAN, ref lstvAN, ref lstdisplAN, ref lstcoordsAN, ref lstFAN);
                         }
                         
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -242,15 +244,19 @@ namespace mechanic
                                 plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "a(t)", "t", "a", true, System.Drawing.Color.Blue);
                                 plot.initControls();
                                 plotxys.Add(plot);
+
+                                plot = new plotxy();
+                                plot.Show();
+                                plot.dt = dtExt;
+                                plot.time = time;
+                                plot.coords = lstFAN;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "Fan(t)", "t", "Fan", false, System.Drawing.Color.Red);
+                                plot.initControls();
+                                plot.coords = lstF;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "F(t)", "t", "F", true, System.Drawing.Color.Blue);
+                                plot.initControls();
+                                plotxys.Add(plot);
                             }
-                            plot = new plotxy();
-                            plot.Show();
-                            plot.dt = dtExt;
-                            plot.time = time;
-                            plot.coords = lstF;
-                            plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "Ftot(t)", "t", "N", true, System.Drawing.Color.Blue);
-                            plotxys.Add(plot);
-                            plot = new plotxy();
                             //plot.Show();
                             //plot.draw2d(axistype.t, axistype.x, lstFep1, time, numP, 1, false, false, "Fep1(x)", "t", "N");
                             //plotxys.Add(plot);

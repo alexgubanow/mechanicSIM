@@ -370,8 +370,8 @@ namespace myMatch
 		};
 		static void t(int numt, double dt, array<double>^ %t)
 		{
-			//t = gcnew array<double>(numt);
-			t[0] = 0;
+			//t[0] = 0;
+			t[0] = dt;
 			for (int i = 1; i < numt; i++)
 			{
 				t[i] = t[i - 1] + dt;
@@ -381,9 +381,10 @@ namespace myMatch
 			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double v0, double const vamp, double const D, double const Renum, array<double>^ time,
 			array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
 			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords,
-			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN)
+			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN, array<array<array<double>^>^>^ %lstFAN)
 		{
-			double dt = time[1];
+			//double dt = time[1];
+			double dt = time[0];
 			if (IsConsoleOut)
 			{
 				AllocConsole();
@@ -399,6 +400,8 @@ namespace myMatch
 				Iz = (M_PI * D * D * D * D) / 64;
 			}
 			double r = D / 2;
+			double l = L / numP;
+			double massa = ro * A * l;
 			if (model == Models::particle)
 			{
 				A = M_PI * (r * r * r) * ((double)4 / (double)3);
@@ -429,13 +432,18 @@ namespace myMatch
 			double fiP = Math::Atan(w * tauP);
 			for (int k = 0; k < numP; k++)
 			{
-				v0 = qPs * vamp * sin(-fiP);
-				lsta[0][k][0] = qPs * w * vamp * cos(-fiP);
-				lstaAN[0][k][0] = lsta[0][k][0];
-				lstF[0][k][0] = (ro * A) * lsta[0][k][0];
+				double Vm0 = vamp * sin(w * time[0]);
+				v0 = qPs * vamp * sin((w * time[0]) - fiP);
+				double v_0 = qPs * vamp * sin(- fiP);
+				double re0 = (abs(Vm0 - v0) * D) / um;
 				lstv[0][k][0] = v0;
 				lstvAN[0][k][0] = v0;
-				lstdispla[0][k][0] = - ((qPs * vamp ) / w ) * cos(-fiP);
+				lstF[0][k][0] = 3 * M_PI  * um * D * (Vm0 - v0) *(1 + (3.0 / 16.0) * re0);
+				lstFAN[0][k][0] = lstF[0][k][0];
+				//lsta[0][k][0] = qPs * w * vamp * cos((w * time[0]) - fiP);
+				lsta[0][k][0] = lstF[0][k][0] / massa;
+				lstaAN[0][k][0] = lsta[0][k][0];
+				lstdispla[0][k][0] = - ((qPs * vamp ) / w ) * cos((w * time[0]) - fiP);
 				lstdisplAN[0][k][0] = lstdispla[0][k][0];
 			}
 
@@ -445,8 +453,8 @@ namespace myMatch
 				strtoLoad(sr->ReadLine(), Load);
 				for (int np = 0; np < numP; np++)
 				{
-					double l = L / numP;
-					double massa = ro * A * l;
+					l = L / numP;
+					massa = ro * A * l;
 					if (model == Models::particle)
 					{
 						massa = ro * A;
@@ -469,69 +477,16 @@ namespace myMatch
 						break;
 					}
 
-					switch (points[np].ExtLoad)
-					{
-					case ExtLoadType::coords:
-						Integration::get_xvab_from_coords(lstcoords[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
-							lstdispla[i][np], lstv[i][np], lsta[i][np]);
-						break;
-					case ExtLoadType::displ:
-						Integration::get_coordsvab_from_dipl(lstdispla[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
-							lstdispla[i][np], lstv[i][np], lsta[i][np]);
-						break;
-					default:
-						switch (shema)
-						{
-						case IntegrSchems::euler:
-							Integration::euler(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i - 1][np], dt, massa, l,
-								lstdispla[i][np], lstv[i][np], lsta[i][np]);
-							break;
-						case IntegrSchems::verlet:
-							Integration::verlet(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i - 1][np], dt, massa, l,
-								lstdispla[i][np], lstv[i][np], lsta[i][np]);
-							break;
-						case IntegrSchems::gear:
-							if (predictor)
-							{
-								Integration::gearp(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstb[i - 1][np], lstF[i - 1][np], dt, massa, l,
-									lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
-								break;
-							}
-							else
-							{
-								Integration::gearc(lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np], lstF[i][np], dt, massa, l,
-									lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
-								break;
-							}
-						}
-						lstcoords[i][np][0] = lstcoords[i - 1][np][0] + lstdispla[i][np][0];
-						lstcoords[i][np][1] = lstcoords[i - 1][np][1] + lstdispla[i][np][1];
-						lstcoords[i][np][2] = lstcoords[i - 1][np][2] + lstdispla[i][np][2];
-						break;
-					}
 
 					array<double>^ Re = gcnew array < double >(3);
 					array<double>^ Venv = gcnew array < double >(3);
-
+					double vpredict = lstv[i - 1][np][0] + (lsta[i - 1][np][0] * dt);
 					if (model == Models::particle && predictor)
 					{
-						if (Retype == Retypes::dyn)
-						{
-							for (int j = 0; j < 3; j++)
-							{
-								Re[j] = (lstv[i][np][j] * D) / um;
-							}
-						}
-						else if (Retype == Retypes::stat)
-						{
-							for (int j = 0; j < 3; j++)
-							{
-								Re[j] = Renum;
-							}
-						}
 						//countCycle++;
+
 						double qP = 0;
-						if (Retype == Retypes::dyn)
+						/*if (Retype == Retypes::dyn)
 						{
 							double h = (9 * ro * vamp) / (2 * M_PI * ro * w * D);
 							qP = (qPs + h * (ls * ls)) / Math::Sqrt(1 + 2 * h * (ls * ls) * qPs + (h * h) * (ls * ls* ls* ls));
@@ -539,7 +494,8 @@ namespace myMatch
 						else if (Retype == Retypes::stat)
 						{
 							qP = qPs;
-						}
+						}*/
+						qP = qPs;
 						if (!isConsOut)
 						{
 							Console::WriteLine("massa = " + massa);
@@ -553,7 +509,7 @@ namespace myMatch
 						if (numP > 1)
 						{
 							double nu = um;
-							double r = D / 2;
+							double r = lstcoords[i][np][0] ;
 							double cosFi = 1;
 							double moduleV = abs(lstv[i][np][0]);
 							double A0 = ((3 * nu * r) / 2 * moduleV) * (1 + ((3 * r) / (8 * nu)) * moduleV);
@@ -577,6 +533,21 @@ namespace myMatch
 							lstdisplAN[i][np][0] = lstdisplAN[i][np][0] - ((qP * vamp) / w) * cos((w *  time[i]) - fiP);
 							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * sin((w *  time[i]) - fiP);
 							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * vamp * cos((w *  time[i]) - fiP) * w;
+							lstFAN[i][np][0] = lstaAN[i][np][0] * massa;
+						}
+						if (Retype == Retypes::dyn)
+						{
+							for (int j = 0; j < 3; j++)
+							{
+								Re[j] = (abs(Vm[i][np][0] - (vpredict)) * D) / um;
+							}
+						}
+						else if (Retype == Retypes::stat)
+						{
+							for (int j = 0; j < 3; j++)
+							{
+								Re[j] = Renum;
+							}
 						}
 					}
 
@@ -613,9 +584,51 @@ namespace myMatch
 						lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
 						break;
 					case Models::particle:
+						lstv[i][np][0] = lstv[i - 1][np][0] + (lsta[i - 1][np][0] * dt);
 						ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstF[i][np]);
 						break;
-					}					
+					}	
+
+					switch (points[np].ExtLoad)
+					{
+					case ExtLoadType::coords:
+						Integration::get_xvab_from_coords(lstcoords[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
+							lstdispla[i][np], lstv[i][np], lsta[i][np]);
+						break;
+					case ExtLoadType::displ:
+						Integration::get_coordsvab_from_dipl(lstdispla[i][np], lstcoords[i - 1][np], lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], dt,
+							lstdispla[i][np], lstv[i][np], lsta[i][np]);
+						break;
+					default:
+						switch (shema)
+						{
+						case IntegrSchems::euler:
+							Integration::euler(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i][np], dt, massa, l,
+								lstdispla[i][np], lstv[i][np], lsta[i][np]);
+							break;
+						case IntegrSchems::verlet:
+							Integration::verlet(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstF[i][np], dt, massa, l,
+								lstdispla[i][np], lstv[i][np], lsta[i][np]);
+							break;
+						case IntegrSchems::gear:
+							if (predictor)
+							{
+								Integration::gearp(lstdispla[i - 1][np], lstv[i - 1][np], lsta[i - 1][np], lstb[i - 1][np], lstF[i - 1][np], dt, massa, l,
+									lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
+								break;
+							}
+							else
+							{
+								Integration::gearc(lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np], lstF[i][np], dt, massa, l,
+									lstdispla[i][np], lstv[i][np], lsta[i][np], lstb[i][np]);
+								break;
+							}
+						}
+						lstcoords[i][np][0] = lstcoords[0][np][0] + lstdispla[i][np][0];
+						lstcoords[i][np][1] = lstcoords[0][np][1] + lstdispla[i][np][1];
+						lstcoords[i][np][2] = lstcoords[0][np][2] + lstdispla[i][np][2];
+						break;
+					}
 					if (np == numP - 1)
 					{
 						//lstFem1[i][np][0] = 0 - ForceCalcs.metal(lstdispla[i][np - 1], lstdispla[i - 1][np - 1], Iz, A, l)[0];
