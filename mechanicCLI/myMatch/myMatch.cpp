@@ -515,23 +515,26 @@ namespace myMatch
 						Venv = gcnew array < double >(3);						
 						if (numP > 1)
 						{
-							double nu = um;
+							double ni = um;
 							double r = abs(lstcoords[i][0][0] - lstcoords[i][1][0]);
 							double cosTeta = 0;
 							if (np == 0)
 							{
-								cosTeta = 1;
+								cosTeta = -1;
 							}
 							if (np == 1)
 							{
-								cosTeta = -1;
+								cosTeta = 1;
 							}
-							double moduleV = abs(Vm[i][np][0] - lstv[i][np][0]);
-							double A0 = ((3 * nu * (Vm[i][np][0] - lstv[i][np][0]) * Rp) / 2 * moduleV) * (1 + ((3 * Rp * moduleV) / (8 * nu)) );
-							double Vmp = -(A0 / pow(r, 2)) + ((A0 * exp(-((moduleV * r * (1 + cosTeta)) / (2 * nu)))) / pow(r, 2)) * (1 + (moduleV / (2 * nu)) * r * (1 - cosTeta));
+							double Vk = abs(Vm[i][np][0] - lstv[i][np][0]);
+							double moduleVk = abs(Vk);
+							double Ak = ((3 * ni * Rp * Vk) / (2 * moduleVk)) * ( 1 + ((3 * ni * Rp * moduleVk) / (8 * ni)));
+							double Vmp = (Ak / pow(r, 2)) - (Ak / pow(r, 2)) * exp(-(r / (2 * ni)) * ( moduleVk - Vk * cosTeta)) * (1 + (r / (2 * ni)) * (moduleVk + Vk * cosTeta));
+							//double A0 = ((3 * nu * (Vm[i][np][0] - lstv[i][np][0]) * Rp) / 2 * moduleV) * (1 + ((3 * Rp * moduleV) / (8 * nu)) );
+							//double Vmp = -(A0 / pow(r, 2)) + ((A0 * exp(-((moduleV * r * (1 + cosTeta)) / (2 * nu)))) / pow(r, 2)) * (1 + (moduleV / (2 * nu)) * r * (1 - cosTeta));
 							Venv[0] = Vm[i][np][0] + Vmp;
-							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) - Vmp);
-							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) - Vmp);
+							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) + Vmp);
+							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) + Vmp);
 						}
 						else
 						{
