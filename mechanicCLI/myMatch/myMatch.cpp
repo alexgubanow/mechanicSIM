@@ -254,13 +254,13 @@ namespace myMatch
 			ap[1] = F[1] / massa;
 			ap[2] = F[2] / massa * l * l * 0.5;
 
-			vp[0] = lastv[0] + (lasta[0] * deltat);
-			vp[1] = lastv[1] + (lasta[1] * deltat);
-			vp[2] = lastv[2] + (lasta[2] * deltat);
+			vp[0] = lastv[0] + (ap[0] * deltat);
+			vp[1] = lastv[1] + (ap[1] * deltat);
+			vp[2] = lastv[2] + (ap[2] * deltat);
 
-			xp[0] = lastx[0] + (lastv[0] * deltat);
-			xp[1] = lastx[1] + (lastv[1] * deltat);
-			xp[2] = lastx[2] + (lastv[2] * deltat);
+			xp[0] = lastx[0] + (vp[0] * deltat);
+			xp[1] = lastx[1] + (vp[1] * deltat);
+			xp[2] = lastx[2] + (vp[2] * deltat);
 			return 0;
 		};
 		static int verlet(array<double>^  lastx, array<double>^  lastv, array<double>^ lasta, array<double>^  F,
@@ -399,12 +399,12 @@ namespace myMatch
 				A = (M_PI * D * D) / 4;
 				Iz = (M_PI * D * D * D * D) / 64;
 			}
-			double r = D / 2;
+			double Rp = D / 2;
 			double l = L / numP;
 			double massa = ro * A * l;
 			if (model == Models::particle)
 			{
-				A = M_PI * (r * r * r) * ((double)4 / (double)3);
+				A = M_PI * pow(Rp, 3) * ((double)4 / (double)3);
 			}
 			if (IsConsoleOut)
 			{
@@ -426,7 +426,7 @@ namespace myMatch
 			array<double>^ Load = gcnew array<double>(3);
 			//int countCycle = 0;
 			double w = 2 * M_PI * 3000;
-			double tauP = (ro * Math::Pow(D, 2)) / (18 * um);
+			double tauP = (2 * ro * Math::Pow(Rp, 2)) / (9 * um);
 			double qPs = 1 / Math::Sqrt(1 + (w * tauP) * (w * tauP));
 			double ls = (w * tauP) / Math::Sqrt(1 + (w * tauP) * (w * tauP));
 			double fiP = Math::Atan(w * tauP);
@@ -435,7 +435,11 @@ namespace myMatch
 				double Vm0 = vamp * sin(w * time[0]);
 				v0 = qPs * vamp * sin((w * time[0]) - fiP);
 				double v_0 = qPs * vamp * sin(- fiP);
-				double re0 = (abs(Vm0 - v0) * D) / um;
+				double re0 = Renum;
+				if (Retype == Retypes::dyn)
+				{
+					re0 = (2 * Rp * abs(Vm0 - v0) * ls) / um;
+				}
 				lstv[0][k][0] = v0;
 				lstvAN[0][k][0] = v0;
 				lstF[0][k][0] = 3 * M_PI  * um * D * (Vm0 - v0) *(1 + (3.0 / 16.0) * re0);
@@ -486,16 +490,19 @@ namespace myMatch
 						//countCycle++;
 
 						double qP = 0;
-						/*if (Retype == Retypes::dyn)
+						double lP = 0;
+						if (Retype == Retypes::dyn)
 						{
-							double h = (9 * ro * vamp) / (2 * M_PI * ro * w * D);
-							qP = (qPs + h * (ls * ls)) / Math::Sqrt(1 + 2 * h * (ls * ls) * qPs + (h * h) * (ls * ls* ls* ls));
+							double h = (9 * ro * vamp) / (2 * M_PI * ro * w * Rp);
+							qP = (qPs + h * pow(ls, 2)) /( Math::Sqrt(1 + 2 * h * pow(ls, 2) * qPs + pow(h, 2) * pow(ls, 4)));
+							lP = ls / Math::Sqrt(1 + 2 * h * pow(ls, 2) * qPs + pow(h, 2) * pow(ls, 4));
 						}
 						else if (Retype == Retypes::stat)
 						{
 							qP = qPs;
-						}*/
-						qP = qPs;
+							lP = ls;
+						}
+						//qP = qPs;
 						if (!isConsOut)
 						{
 							Console::WriteLine("massa = " + massa);
@@ -509,37 +516,37 @@ namespace myMatch
 						if (numP > 1)
 						{
 							double nu = um;
-							double r = lstcoords[i][np][0] ;
-							double cosFi = 1;
-							double moduleV = abs(lstv[i][np][0]);
-							double A0 = ((3 * nu * r) / 2 * moduleV) * (1 + ((3 * r) / (8 * nu)) * moduleV);
-							double Vmp = -(A0 / pow(r, 2)) + ((A0 * exp(-((moduleV * r * (1 + cosFi)) / (2 * nu)))) / pow(r, 2)) * (1 + (moduleV / (2 * nu)) * r * (1 - cosFi));
+							double r = abs(lstcoords[i][0][0] - lstcoords[i][1][0]);
+							double cosTeta = 0;
 							if (np == 0)
 							{
-								Venv[0] = Vm[i][np][0] - Vmp;
-								lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) - Vmp);
-								lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) - Vmp);
+								cosTeta = 1;
 							}
 							if (np == 1)
 							{
-								Venv[0] = Vm[i][np][0] + Vmp;
-								lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) - Vmp);
-								lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) - Vmp);
+								cosTeta = -1;
 							}
+							double moduleV = abs(Vm[i][np][0] - lstv[i][np][0]);
+							double A0 = ((3 * nu * (Vm[i][np][0] - lstv[i][np][0]) * Rp) / 2 * moduleV) * (1 + ((3 * Rp * moduleV) / (8 * nu)) );
+							double Vmp = -(A0 / pow(r, 2)) + ((A0 * exp(-((moduleV * r * (1 + cosTeta)) / (2 * nu)))) / pow(r, 2)) * (1 + (moduleV / (2 * nu)) * r * (1 - cosTeta));
+							Venv[0] = Vm[i][np][0] + Vmp;
+							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) - Vmp);
+							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) - Vmp);
 						}
 						else
 						{
 							Venv[0] = Vm[i][np][0];
-							lstdisplAN[i][np][0] = lstdisplAN[i][np][0] - ((qP * vamp) / w) * cos((w *  time[i]) - fiP);
-							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * vamp * sin((w *  time[i]) - fiP);
-							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * vamp * cos((w *  time[i]) - fiP) * w;
+							lstdisplAN[i][np][0] = lstdisplAN[i][np][0] - ((qPs * vamp) / w) * cos((w *  time[i]) - fiP);
+							lstvAN[i][np][0] = lstvAN[i][np][0] + qPs * vamp * sin((w *  time[i]) - fiP);
+							lstaAN[i][np][0] = lstaAN[i][np][0] + qPs * vamp * cos((w *  time[i]) - fiP) * w;
 							lstFAN[i][np][0] = lstaAN[i][np][0] * massa;
 						}
 						if (Retype == Retypes::dyn)
 						{
 							for (int j = 0; j < 3; j++)
 							{
-								Re[j] = (abs(Vm[i][np][0] - (vpredict)) * D) / um;
+								//Re[j] = (abs(Vm[i][np][0] - (vpredict)) * D) / um;
+								Re[j] = (2 * Rp * abs(Venv[0] - lstv[i][np][0]) * lP) / um;
 							}
 						}
 						else if (Retype == Retypes::stat)
