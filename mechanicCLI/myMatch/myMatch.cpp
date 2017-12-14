@@ -53,6 +53,17 @@ namespace myMatch
 					{
 						arrcoords[i][np][0] = arrcoords[i][np - 1][0] + l;
 					}
+					if (points->Length == 2)
+					{
+						if (np != 0)
+						{
+							arrcoords[i][np][0] = 0 + l / 2;
+						}
+						else
+						{
+							arrcoords[i][np][0] = 0 - l / 2;
+						}
+					}
 				}
 			}
 		};
@@ -370,8 +381,8 @@ namespace myMatch
 		};
 		static void t(int numt, double dt, array<double>^ %t)
 		{
-			//t[0] = 0;
-			t[0] = dt;
+			t[0] = 0;
+			//t[0] = dt;
 			for (int i = 1; i < numt; i++)
 			{
 				t[i] = t[i - 1] + dt;
@@ -383,8 +394,8 @@ namespace myMatch
 			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords,
 			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN, array<array<array<double>^>^>^ %lstFAN)
 		{
-			//double dt = time[1];
-			double dt = time[0];
+			double dt = time[1];
+			//double dt = time[0];
 			if (IsConsoleOut)
 			{
 				AllocConsole();
@@ -442,13 +453,14 @@ namespace myMatch
 				}
 				lstv[0][k][0] = v0;
 				lstvAN[0][k][0] = v0;
-				lstF[0][k][0] = 3 * M_PI  * um * D * (Vm0 - v0) *(1 + (3.0 / 16.0) * re0);
-				lstFAN[0][k][0] = lstF[0][k][0];
+				//lstF[0][k][0] = 3 * M_PI  * um * D * (Vm0 - v0) * (1 + (3.0 / 16.0) * re0);
+				//lstFAN[0][k][0] = lstF[0][k][0];
 				//lsta[0][k][0] = qPs * w * vamp * cos((w * time[0]) - fiP);
-				lsta[0][k][0] = lstF[0][k][0] / massa;
-				lstaAN[0][k][0] = lsta[0][k][0];
-				lstdispla[0][k][0] = - ((qPs * vamp ) / w ) * cos((w * time[0]) - fiP);
-				lstdisplAN[0][k][0] = lstdispla[0][k][0];
+				//lstF[0][k][0] = lsta[0][k][0] * massa;
+				//lsta[0][k][0] = lstF[0][k][0] / massa;
+				//lstaAN[0][k][0] = lsta[0][k][0];
+				//lstdispla[0][k][0] = - ((qPs * vamp ) / w ) * cos((w * time[0]) - fiP);
+				//lstdisplAN[0][k][0] = lstdispla[0][k][0];
 			}
 
 			for (int i = 1; i < counts; i++)
@@ -515,7 +527,7 @@ namespace myMatch
 						Venv = gcnew array < double >(3);						
 						if (numP > 1)
 						{
-							double ni = um;
+							double ni = um / 1.2754;
 							double r = abs(lstcoords[i][0][0] - lstcoords[i][1][0]);
 							double cosTeta = 0;
 							if (np == 0)
@@ -526,12 +538,11 @@ namespace myMatch
 							{
 								cosTeta = 1;
 							}
-							double Vk = abs(Vm[i][np][0] - lstv[i][np][0]);
+							double Vk = Vm[i][np][0] - lstv[i][np][0];
 							double moduleVk = abs(Vk);
 							double Ak = ((3 * ni * Rp * Vk) / (2 * moduleVk)) * ( 1 + ((3 * ni * Rp * moduleVk) / (8 * ni)));
 							double Vmp = (Ak / pow(r, 2)) - (Ak / pow(r, 2)) * exp(-(r / (2 * ni)) * ( moduleVk - Vk * cosTeta)) * (1 + (r / (2 * ni)) * (moduleVk + Vk * cosTeta));
-							//double A0 = ((3 * nu * (Vm[i][np][0] - lstv[i][np][0]) * Rp) / 2 * moduleV) * (1 + ((3 * Rp * moduleV) / (8 * nu)) );
-							//double Vmp = -(A0 / pow(r, 2)) + ((A0 * exp(-((moduleV * r * (1 + cosTeta)) / (2 * nu)))) / pow(r, 2)) * (1 + (moduleV / (2 * nu)) * r * (1 - cosTeta));
+							//Vmp = Vmp / 10;
 							Venv[0] = Vm[i][np][0] + Vmp;
 							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) + Vmp);
 							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) + Vmp);
@@ -548,11 +559,10 @@ namespace myMatch
 						{
 							for (int j = 0; j < 3; j++)
 							{
-								//Re[j] = (abs(Vm[i][np][0] - (vpredict)) * D) / um;
 								Re[j] = (2 * Rp * abs(Venv[0] - lstv[i][np][0]) * lP) / um;
 							}
 						}
-						else if (Retype == Retypes::stat)
+						else
 						{
 							for (int j = 0; j < 3; j++)
 							{
