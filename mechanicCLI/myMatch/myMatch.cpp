@@ -265,13 +265,13 @@ namespace myMatch
 			ap[1] = F[1] / massa;
 			ap[2] = F[2] / massa * l * l * 0.5;
 
-			vp[0] = lastv[0] + (ap[0] * deltat);
-			vp[1] = lastv[1] + (ap[1] * deltat);
-			vp[2] = lastv[2] + (ap[2] * deltat);
+			vp[0] = lastv[0] + (lasta[0] * deltat);
+			vp[1] = lastv[1] + (lasta[1] * deltat);
+			vp[2] = lastv[2] + (lasta[2] * deltat);
 
-			xp[0] = lastx[0] + (vp[0] * deltat);
-			xp[1] = lastx[1] + (vp[1] * deltat);
-			xp[2] = lastx[2] + (vp[2] * deltat);
+			xp[0] = lastx[0] + (lastv[0] * deltat);
+			xp[1] = lastx[1] + (lastv[1] * deltat);
+			xp[2] = lastx[2] + (lastv[2] * deltat);
 			return 0;
 		};
 		static int verlet(array<double>^  lastx, array<double>^  lastv, array<double>^ lasta, array<double>^  F,
@@ -392,7 +392,7 @@ namespace myMatch
 			double const L, double const b, double const h, double const ro, int const numP, int const counts, double const elastic, double v0, double const vamp, double const D, double const Renum, array<double>^ time,
 			array<array<array<double>^>^>^ %lstF, array<array<array<double>^>^>^ %lstFep1, array<array<array<double>^>^>^ %lstFem1,
 			array<array<array<double>^>^>^ %lsta, array<array<array<double>^>^>^ %lstb, array<array<array<double>^>^>^ %lstv, array<array<array<double>^>^>^ %lstdispla, array<array<array<double>^>^>^ %lstcoords,
-			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN, array<array<array<double>^>^>^ %lstFAN)
+			array<array<array<double>^>^>^ %lstaAN, array<array<array<double>^>^>^ %lstvAN, array<array<array<double>^>^>^ %lstdisplAN, array<array<array<double>^>^>^ %lstcoordsAN, array<array<array<double>^>^>^ %lstFAN, array<array<array<double>^>^>^ %lstVmp)
 		{
 			double dt = time[1];
 			//double dt = time[0];
@@ -434,6 +434,7 @@ namespace myMatch
 			{
 				sr->ReadLine();
 			}
+
 			array<double>^ Load = gcnew array<double>(3);
 			//int countCycle = 0;
 			double w = 2 * M_PI * 3000;
@@ -528,24 +529,27 @@ namespace myMatch
 						if (numP > 1)
 						{
 							double ni = um / 1.2754;
-							double r = abs(lstcoords[i][0][0] - lstcoords[i][1][0]);
 							double cosTeta = 0;
-							if (np == 0)
+							double r = abs(lstcoords[i - 1][0][0] - lstcoords[i - 1][1][0]);
+
+							if ( np == 0)
 							{
 								cosTeta = -1;
 							}
-							if (np == 1)
+							else
 							{
 								cosTeta = 1;
 							}
-							double Vk = Vm[i][np][0] - lstv[i][np][0];
+							double Vk = (Vm[i - 1][np][0] + lstVmp[i - 1][np][0]) - lstv[i - 1][np][0];
 							double moduleVk = abs(Vk);
-							double Ak = ((3 * ni * Rp * Vk) / (2 * moduleVk)) * ( 1 + ((3 * ni * Rp * moduleVk) / (8 * ni)));
-							double Vmp = (Ak / pow(r, 2)) - (Ak / pow(r, 2)) * exp(-(r / (2 * ni)) * ( moduleVk - Vk * cosTeta)) * (1 + (r / (2 * ni)) * (moduleVk + Vk * cosTeta));
+							double Ak = ((3 * ni * Rp * Vk) / (2 * moduleVk)) * ( 1 + ((3 * Rp * moduleVk) / (8 * ni)));
+
+							lstVmp[i][np][0] = ( (- (Ak / pow(r, 2))) + (Ak  * exp(-(r / (2 * ni)) * (moduleVk + Vk * cosTeta)) / pow(r, 2)) * (1 + (r / (2 * ni)) * (moduleVk - Vk * cosTeta)));
+							//lstVmp[i][np][0] = ((Ak / pow(r, 2)) - (Ak / pow(r, 2)) * exp(-(r / (2 * ni)) * (moduleVk - Vk * cosTeta)) * (1 + (r / (2 * ni)) * (moduleVk + Vk * cosTeta))) / 10;
 							//Vmp = Vmp / 10;
-							Venv[0] = Vm[i][np][0] + Vmp;
-							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)) + Vmp);
-							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w) + Vmp);
+							Venv[0] = Vm[i][np][0] + lstVmp[i][np][0];
+							lstvAN[i][np][0] = lstvAN[i][np][0] + qP * ((vamp * sin((w *  time[i]) - fiP)));
+							lstaAN[i][np][0] = lstaAN[i][np][0] + qP * ((vamp * cos((w *  time[i]) - fiP) * w));
 						}
 						else
 						{
@@ -604,8 +608,8 @@ namespace myMatch
 						lstF[i][np][2] = lstF[i][np][2] + lstFem1[i][np][2] + lstFep1[i][np][2];
 						break;
 					case Models::particle:
-						lstv[i][np][0] = lstv[i - 1][np][0] + (lsta[i - 1][np][0] * dt);
-						ForceCalcs::particle(Venv, lstv[i][np], D, Re, lstF[i][np]);
+						//lstv[i][np][0] = lstv[i - 1][np][0] + (lsta[i - 1][np][0] * dt);
+						ForceCalcs::particle(Venv, lstv[i - 1][np], D, Re, lstF[i][np]);
 						break;
 					}	
 

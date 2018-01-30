@@ -138,6 +138,8 @@ namespace mechanic
                         double[][][] lstcoordsAN = new double[countsExt][][];
                         double[][][] lstFAN = new double[countsExt][][];
 
+                        double[][][] lstVmp = new double[countsExt][][];
+
                         strRead = sr.ReadLine();
                         double dtExt = Convert.ToDouble(strRead);
                         string[] strload = sr.ReadLine().Split(':');
@@ -179,6 +181,7 @@ namespace mechanic
                         initArr._3d(numP, 3, ref lstdisplAN);
                         initArr._3d(numP, 3, ref lstcoordsAN);
                         initArr._3d(numP, 3, ref lstFAN);
+                        initArr._3d(numP, 3, ref lstVmp);
 
                         if (CalcType == CalcTypes.statical)
                         {
@@ -191,7 +194,7 @@ namespace mechanic
                             calc.Movement(flname, points, Modeltype, IntegShematype, CalcType, MaterialModeltype, Retype, IsConsoleOut,
                                 L, b, h, ro, numP, countsExt, elastic, v0, vamp, D, Re, time,
                                 ref lstF, ref lstFep1, ref lstFem1, ref lsta, ref lstb, ref lstv, ref lstdispla, ref lstcoords,
-                                ref lstaAN, ref lstvAN, ref lstdisplAN, ref lstcoordsAN, ref lstFAN);
+                                ref lstaAN, ref lstvAN, ref lstdisplAN, ref lstcoordsAN, ref lstFAN, ref lstVmp);
                         }
                         
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -254,6 +257,15 @@ namespace mechanic
                                 plot.initControls();
                                 plot.coords = lstF;
                                 plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "F(t)", "t", "F", true, System.Drawing.Color.Blue);
+                                plot.initControls();
+                                plotxys.Add(plot);
+
+                                plot = new plotxy();
+                                plot.Show();
+                                plot.dt = dtExt;
+                                plot.time = time;
+                                plot.coords = lstVmp;
+                                plot.draw2d(axistype.t, axistype.x, numP, 1, true, false, "Fan(t)", "t", "Fan", false, System.Drawing.Color.Red);
                                 plot.initControls();
                                 plotxys.Add(plot);
                             }
