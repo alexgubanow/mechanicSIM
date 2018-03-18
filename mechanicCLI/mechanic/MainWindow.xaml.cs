@@ -74,6 +74,10 @@ namespace mechanic
             
             point[] points;
             GC.Collect();
+            LinearModel mosd = new LinearModel();
+            mosd.initTimeMoments(100, 5, 6);
+            mosd.calcMove();
+            //mosd.timeMoments[0];
             double ro = calc.StrPow(textBox_ro.Text, textBox_ropop.Text);
             double L = calc.StrPow(textBox_L.Text, textBox_Lpop.Text);
             double h = calc.StrPow(textBox_h.Text, textBox_hpop.Text);
