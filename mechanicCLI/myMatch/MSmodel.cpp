@@ -3,35 +3,32 @@
 #include <typeinfo>
 #using <system.dll>
 #using <mscorlib.dll>
+
+#include "integrSchems.h"
+
 using namespace std;
 using namespace System;
 using namespace System::IO;
 
 namespace myMatch
 {
+	static int elastic = 215000000000;
+	
 	public enum class nodeFreedoms { x, y, z, xy, xz, yz, xyz };
 
-	ref class Point
+	public ref class Point
 	{
-	private:
-		static int _index = 0;
-		static array<double^>^ _coord;
-		static array<double^>^ _force;
-		static array<double^>^ _displ;
-		static array<double^>^ _velos;
-		static array<double^>^ _accl;// 3-th derivative
-		static array<double^>^ _jerk;// 4-th derivative
 	public:
-		property int index { int get() { return _index; } void set(int value) { _index = value; } };
-		property array<double^>^ coord { array<double^>^ get() { return _coord; } void set(array<double^>^ value) { _coord = value; } };
-		property array<double^>^ force { array<double^>^ get() { return _force; } void set(array<double^>^ value) { _force = value; } };
-		property array<double^>^ displ { array<double^>^ get() { return _displ; } void set(array<double^>^ value) { _displ = value; } };
-		property array<double^>^ velos { array<double^>^ get() { return _velos; } void set(array<double^>^ value) { _velos = value; } };
-		property array<double^>^ accl { array<double^>^ get() { return _accl; } void set(array<double^>^ value) { _accl = value; } };
-		property array<double^>^ jerk { array<double^>^ get() { return _jerk; } void set(array<double^>^ value) { _jerk = value; } };
-		void initValues(int, array<double^>^, array<double^>^, array<double^>^, array<double^>^, array<double^>^, array<double^>^);
+		int index;
+		array<double>^ coord;
+		array<double>^ force;
+		array<double>^ displ;
+		array<double>^ velos;
+		array<double>^ accl;
+		array<double>^ jerk;
+		void initValues(int, array<double>^, array<double>^, array<double>^, array<double>^, array<double>^, array<double>^);
 	};
-	void Point::initValues(int newindex, array<double^>^ newcoord, array<double^>^ newforce, array<double^>^ newdispl, array<double^>^ newvelos, array<double^>^ newaccl, array<double^>^ newjerk)
+	void Point::initValues(int newindex, array<double>^ newcoord, array<double>^ newforce, array<double>^ newdispl, array<double>^ newvelos, array<double>^ newaccl, array<double>^ newjerk)
 	{
 		index = newindex;
 		coord = newcoord;
@@ -44,25 +41,16 @@ namespace myMatch
 
 	public ref class Node
 	{
-	private:
-		static nodeFreedoms _nodeFreedom;
-		static array<int^>^ _members;
-		static array<double^>^ _coord;
-		static array<double^>^ _force;
-		static array<double^>^ _displ;
-		static array<double^>^ _velos;
-		static array<double^>^ _accl;// 3-th derivative
-		static array<double^>^ _jerk;// 4-th derivative
 	public:
-		property nodeFreedoms nodeFreedom { nodeFreedoms get() { return _nodeFreedom; } void set(nodeFreedoms value) { _nodeFreedom = value; } };
-		property array<int^>^ members { array<int^>^ get() { return _members; } void set(array<int^>^ value) { _members = value; } };
-		property array<double^>^ coord { array<double^>^ get() { return _coord; } void set(array<double^>^ value) { _coord = value; } };
-		property array<double^>^ force { array<double^>^ get() { return _force; } void set(array<double^>^ value) { _force = value; } };
-		property array<double^>^ displ { array<double^>^ get() { return _displ; } void set(array<double^>^ value) { _displ = value; } };
-		property array<double^>^ velos { array<double^>^ get() { return _velos; } void set(array<double^>^ value) { _velos = value; } };
-		property array<double^>^ accl { array<double^>^ get() { return _accl; } void set(array<double^>^ value) { _accl = value; } };
-		property array<double^>^ jerk { array<double^>^ get() { return _jerk; } void set(array<double^>^ value) { _jerk = value; } };
-		void initValues(nodeFreedoms newnodeFreedom, array<int^>^ newmembers, array<double^>^ newcoord, array<double^>^ newforce, array<double^>^ newdispl, array<double^>^ newvelos, array<double^>^ newaccl, array<double^>^ newjerk)
+		nodeFreedoms nodeFreedom;
+		array<int>^ members;
+		array<double>^ coord;
+		array<double>^ force;
+		array<double>^ displ;
+		array<double>^ velos;
+		array<double>^ accl;
+		array<double>^ jerk;
+		void initValues(nodeFreedoms newnodeFreedom, array<int>^ newmembers, array<double>^ newcoord, array<double>^ newforce, array<double>^ newdispl, array<double>^ newvelos, array<double>^ newaccl, array<double>^ newjerk)
 		{
 			nodeFreedom = newnodeFreedom;
 			members = newmembers;
@@ -77,113 +65,120 @@ namespace myMatch
 
 	public ref class timeMoment
 	{
-	private:
-		static array<Point^>^ _Points;
-		static array<Node^>^ _Nodes;
 	public:
-		property array<Point^>^ Points { array<Point^>^ get() { return _Points; } void set(array<Point^>^ value) { _Points = value; } };
-		property array<Node^>^ Nodes { array<Node^>^ get() { return _Nodes; } void set(array<Node^>^ value) { _Nodes = value; } };
+		array<Point^>^ Points;
+		array<Node^>^ Nodes;
 		void initPoints(int numPoints)
 		{
 			Points = gcnew array<Point^>(numPoints);
 			for (int i = 0; i < numPoints; i++)
 			{
 				Points[i] = gcnew Point;
-				Points[i]->initValues(i, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
+				Points[i]->initValues(i, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 });
 			}
 		}
 		void initNodes(int numNodes)
 		{
 			Nodes = gcnew array<Node^>(numNodes);
 			Nodes[0] = gcnew Node;
-			Nodes[0]->initValues(nodeFreedoms::x, gcnew array<int^>(2) { 0, 0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
+			Nodes[0]->initValues(nodeFreedoms::x, gcnew array<int>(2) { 0, 0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 });
 			for (int i = 1; i < numNodes - 1; i++)
 			{
 				Nodes[i] = gcnew Node;
-				Nodes[i]->initValues(nodeFreedoms::x, gcnew array<int^>(2) { i, i + 1 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
+				Nodes[i]->initValues(nodeFreedoms::x, gcnew array<int>(2) { i, i + 1 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 });
 			}
 			Nodes[numNodes - 1] = gcnew Node;
-			Nodes[numNodes - 1]->initValues(nodeFreedoms::x, gcnew array<int^>(2) { numNodes - 1, numNodes - 1 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
+			Nodes[numNodes - 1]->initValues(nodeFreedoms::x, gcnew array<int>(2) { numNodes - 1, numNodes - 1 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 });
 		}
 		void calcNodesMove()
 		{
 			for (int i = 0; i < Nodes->Length; i++)
 			{
-				Nodes[i]->force[0] = Points[(int)(Nodes[i]->members[0])]->force[0];
-				//Nodes[i]->force = Points[Nodes[i]->members[0]]->force + Points[Nodes[i]->members[1]]->force;
+				Nodes[i]->force[0] = Points[Nodes[i]->members[0]]->force[0] + Points[Nodes[i]->members[1]]->force[0];
+				Nodes[i]->accl[0] = Points[Nodes[i]->members[0]]->accl[0] + Points[Nodes[i]->members[1]]->accl[0];
+				Nodes[i]->velos[0] = Points[Nodes[i]->members[0]]->velos[0] + Points[Nodes[i]->members[1]]->velos[0];
+				Nodes[i]->displ[0] = Points[Nodes[i]->members[0]]->displ[0] + Points[Nodes[i]->members[1]]->displ[0];
 			}
 		}
 	};
-	public ref class muCl {
-	public:
-		int m_i;
-	};
-	public ref class MyClass {
-	public:
-		array<muCl^>^ arrInt;
-		void Test1(int ARRAY_SIZE) {
-			int i;
-			arrInt = gcnew array< muCl^ >(ARRAY_SIZE);
-
-			for (i = 0; i < ARRAY_SIZE; i++) {
-				arrInt[i] = gcnew muCl;
-				arrInt[i]->m_i = i;
-			}
-		}
-	};
-
-	public ref class muArr {
-	public:
-		array<MyClass^>^ arrMyclass;
-		void Test1(int ARRAY_SIZE) {
-			arrMyclass = gcnew array< MyClass^ >(ARRAY_SIZE);
-
-			for (int i = 0; i < ARRAY_SIZE; i++) {
-
-				arrMyclass[i] = gcnew MyClass;
-				arrMyclass[i]->arrInt = gcnew array< muCl^ >(ARRAY_SIZE);
-				for (int j = 0; j < ARRAY_SIZE; j++) {
-
-					arrMyclass[i]->arrInt[j] = gcnew muCl;
-					arrMyclass[i]->arrInt[j]->m_i = i * j;
-				}
-			}
-		}
-	};
-
 	public ref class LinearModel
 	{
-	private:
-		static array<timeMoment^>^ _timeMoments;
-		void calcOneMove(int momentNow, int prevMoment);
-	public:
-		property array<timeMoment^>^ timeMoments { array<timeMoment^>^ get() { return _timeMoments; } void set(array<timeMoment^>^ value) { _timeMoments = value; } };
-		void initTimeMoments(int counts, int numNodes, int numPoints);
-		void calcMove();
-	};
-	void LinearModel::initTimeMoments(int counts, int numNodes, int numPoints)
-	{
-		timeMoments = gcnew array<timeMoment^>(counts);
-		for (int i = 0; i < counts; i++)
+		void calcOneMove(int momentNow, int prevMoment)
 		{
-			timeMoments[i] = gcnew timeMoment;
-			timeMoments[i]->initPoints(numPoints);
-			timeMoments[i]->initNodes(numNodes);
-		}
-	}
-	void LinearModel::calcOneMove(int momentNow, int prevMoment)
-	{
-		for (int i = 0; i < timeMoments[momentNow]->Points->Length; i++)
-		{
-			timeMoments[momentNow]->Points[i]->force[0] = (double)i;
+			for (int i = 0; i < timeMoments[momentNow]->Points->Length; i+=2)
+			{
+				//calc force
+				//old version
+				//F[0] = ((elastic * A) / l) * (-(currxi[0] - lastxi[0]));
+				double A = _b * _h;
+				timeMoments[momentNow]->Points[i + 1]->force[0] = -((elastic * A) / _l) * ((timeMoments[prevMoment]->Points[i + 1]->displ[0] - timeMoments[prevMoment]->Points[i]->displ[0]));
+				timeMoments[momentNow]->Points[i]->force[0] = - timeMoments[momentNow]->Points[i + 1]->force[0];
+
+				//integrate it
+				timeMoments[momentNow]->Points[i]->accl[0] = timeMoments[momentNow]->Points[i]->force[0] / _m;
+				timeMoments[momentNow]->Points[i]->velos[0] = (timeMoments[prevMoment]->Points[i]->accl[0] * time[1]);
+				if(i != 0)
+				{
+					timeMoments[momentNow]->Points[i]->displ[0] = (timeMoments[prevMoment]->Points[i]->velos[0] * time[1]);
+				}
+				timeMoments[momentNow]->Points[i + 1]->accl[0] = timeMoments[momentNow]->Points[i + 1]->force[0] / _m;
+				timeMoments[momentNow]->Points[i + 1]->velos[0] = (timeMoments[prevMoment]->Points[i + 1]->accl[0] * time[1]);
+				timeMoments[momentNow]->Points[i + 1]->displ[0] = (timeMoments[prevMoment]->Points[i + 1]->velos[0] * time[1]);
+
+				/*integrSchems::euler(
+					timeMoments[prevMoment]->Points[i]->displ, timeMoments[prevMoment]->Points[i]->velos, timeMoments[prevMoment]->Points[i]->accl, timeMoments[prevMoment]->Points[i]->force,
+					time[1], _m, _l,
+					timeMoments[momentNow]->Points[i]->displ, timeMoments[momentNow]->Points[i]->velos, timeMoments[momentNow]->Points[i]->accl);*/
+			}
 			timeMoments[momentNow]->calcNodesMove();
 		}
-	}
-	void LinearModel::calcMove()
-	{
-		for (int i = 1; i < timeMoments->Length; i++)
+	public:
+		array<timeMoment^>^ timeMoments;
+		array<double>^ time;
+		double _m;
+		double _l;
+		double _b;
+		double _h;
+		LinearModel(int counts, double dt, int numNodes, int numPoints, double massa, double lenght, double b, double h)
 		{
-			calcOneMove(i, i - 1);
+			_m = massa;
+			_l = lenght;
+			_b = b;
+			_h = h;
+			initTime(counts, dt);
+			initTimeMoments(counts, numNodes, numPoints);
 		}
-	}
+		void initTime(int counts, double dt)
+		{
+			time = gcnew array<double>(counts);
+			for (int i = 1; i < counts; i++)
+			{
+				time[i] = time[i - 1] + dt;
+			}
+		}
+		void initTimeMoments(int counts, int numNodes, int numPoints)
+		{
+			timeMoments = gcnew array<timeMoment^>(counts);
+			for (int i = 0; i < counts; i++)
+			{
+				timeMoments[i] = gcnew timeMoment;
+				timeMoments[i]->initPoints(numPoints);
+				timeMoments[i]->initNodes(numNodes);
+			}
+		}
+		void applyLoad(int freq, double amp)
+		{
+			for (int i = 0; i < timeMoments->Length; i++)
+			{
+				timeMoments[i]->Points[0]->displ[0] = amp * sin( time[i] * 2 * M_PI * freq);
+			}
+		}
+		void calcMove()
+		{
+			for (int i = 1; i < timeMoments->Length; i++)
+			{
+				calcOneMove(i, i - 1);
+			}
+		}
+	};
 }

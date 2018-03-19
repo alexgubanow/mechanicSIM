@@ -8,17 +8,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <oxy:Plot Title="Big title" Subtitle="title">
-            <oxy:Plot.Axes>
-                <oxy:LinearAxis Position="Left"/>
-                <oxy:LinearAxis Position="Bottom"/>
-            </oxy:Plot.Axes>
-            <oxy:Plot.Series>
-                <oxy:LineSeries Title="Value" DataFieldX="Time"
-                        DataFieldY="Value"
-                        ItemsSource="{Binding Measurements}"
-                        StrokeThickness="2" Color="Blue" Smooth="True"/>
-            </oxy:Plot.Series>
-        </oxy:Plot>
+        <oxy:PlotView Model="{Binding plotViewModel}" />
     </Grid>
 </Window>
