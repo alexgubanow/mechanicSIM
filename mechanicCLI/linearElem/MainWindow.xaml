@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <oxy:Plot Title="Big title" Subtitle="title">
+        <!--<oxy:Plot x:Name="mainPlot" Title="Big title" Subtitle="title">
             <oxy:Plot.Axes>
                 <oxy:LinearAxis Position="Left"/>
                 <oxy:LinearAxis Position="Bottom"/>
@@ -17,8 +17,9 @@
                 <oxy:LineSeries Title="Value" DataFieldX="Time"
                         DataFieldY="Value"
                         ItemsSource="{Binding Measurements}"
-                        StrokeThickness="2" Color="Blue" Smooth="True"/>
+                        StrokeThickness="2" Color="Blue" />
             </oxy:Plot.Series>
-        </oxy:Plot>
+        </oxy:Plot>-->
+        <oxy:Plot Model=""/>
     </Grid>
 </Window>

@@ -2,6 +2,9 @@ using GalaSoft.MvvmLight;
 using System;
 using System.Collections.ObjectModel;
 using myMatch;
+using OxyPlot.Wpf;
+using System.Collections.Generic;
+using OxyPlot;
 
 namespace linearElem.ViewModel
 {
@@ -21,52 +24,56 @@ namespace linearElem.ViewModel
     {
         public MainViewModel()
         {
-            muArr newMyClass = new muArr();
-            newMyClass.Test1(10);
             linearModel = new LinearModel();
-            linearModel.initTimeMoments(10, 5, 6);
+            linearModel.initTime(100000, 0.000001);
+            linearModel.initTimeMoments(100000, 5, 6);
+            linearModel.applyLoad();
             linearModel.calcMove();
-            this.Measurements = new Collection<Measurement>();
-            for (int i = 0; i < linearModel.timeMoments.Length; i++)
-            {
-                for (int j = 0; j < linearModel.timeMoments[i].Nodes.Length; j++)
-                {
-                    this.Measurements.Add(new Measurement
-                    {
-                        Time = (double)linearModel.timeMoments[i].Nodes[j].force[0],
-                        Value = 0,
-                        Maximum = 0,
-                        Minimum = 0
-                    });
-                }
-            }
-            
 
-            //const int N = 50000;
-            ////this.Subtitle = "N = " + N;
+            //PlotModel model = new PlotModel();
+            //LineSeries s1 = new LineSeries();
+            //s1.
+            //AddPoints(s1.Points, 100000);
+            //model.Series.Add(s1);
 
-            //var r = new Random(385);
-            //double dy = 0;
-            //double y = 0;
-            //for (int i = 0; i < N; i++)
+            //this.Measurements = new Collection<Measurement>();
+            //for (int i = 0; i < linearModel.timeMoments.Length; i++)
             //{
-            //    dy += (r.NextDouble() * 2) - 1;
-            //    y += dy;
-            //    this.Measurements.Add(new Measurement
+            //    for (int j = 0; j < linearModel.timeMoments[i].Nodes.Length; j++)
             //    {
-            //        Time = 2.5 * i / (N - 1),
-            //        Value = y / (N - 1),
-            //        Maximum = (y / (N - 1)) + 5,
-            //        Minimum = (y / (N - 1)) - 5
-            //    });
+            //        this.Measurements.Add(new Measurement
+            //        {
+            //            Time = i,
+            //            Value = (double)linearModel.timeMoments[i].Nodes[j].force[0],
+            //            Maximum = 0,
+            //            Minimum = 0
+            //        });
+            //    }
             //}
+
+        }
+        public PlotModel Model { get; set; }
+        
+        private static IList<DataPoint> GetPoints(int n)
+        {
+            var points = new List<DataPoint>();
+            AddPoints(points, n);
+            return points;
         }
 
+        private static void AddPoints(IList<DataPoint> points, int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                double x = Math.PI * 10 * i / (n - 1);
+                //points.Add(new DataPoint(x * Math.Cos(x), x * Math.Sin(x)));
+            }
+        }
         public LinearModel linearModel { get; private set; }
 
-        public Collection<timeMoment> allCalcs { get; private set; }
+        public Collection<LineSeries> myLineSeries { get; private set; }
 
-        public Collection<Measurement> Measurements { get; private set; }
+        public Collection<DataPoint> Measurements { get; private set; }
 
         public class Measurement
         {
