@@ -11,114 +11,11 @@ namespace myMatch
 {
 	public enum class nodeFreedoms { x, y, z, xy, xz, yz, xyz };
 
-	public ref class coords
-	{
-	private:
-		array<double> ^x;
-	public:
-		property double default[int]
-		{
-			double get(int index)
-		{
-			return x[index];
-		}
-		void set(int index, double value)
-		{
-			x[index] = value;
-		}
-		}
-	};
-	public ref class forces
-	{
-	private:
-		array<double> ^x;
-	public:
-		property double default[int]
-		{
-			double get(int index)
-		{
-			return x[index];
-		}
-		void set(int index, double value)
-		{
-			x[index] = value;
-		}
-		}
-	};
-	public ref class displs
-	{
-	private:
-		array<double> ^x;
-	public:
-		property double default[int]
-		{
-			double get(int index)
-		{
-			return x[index];
-		}
-		void set(int index, double value)
-		{
-			x[index] = value;
-		}
-		}
-	};
-	public ref class veloss
-	{
-	private:
-		array<double> ^x;
-	public:
-		property double default[int]
-		{
-			double get(int index)
-		{
-			return x[index];
-		}
-		void set(int index, double value)
-		{
-			x[index] = value;
-		}
-		}
-	};
-	public ref class accls
-	{
-	private:
-		array<double> ^x;
-	public:
-		property double default[int]
-		{
-			double get(int index)
-		{
-			return x[index];
-		}
-		void set(int index, double value)
-		{
-			x[index] = value;
-		}
-		}
-	};
-	public ref class jerks
-	{
-	private:
-		array<double> ^x;
-	public:
-		property double default[int]
-		{
-			double get(int index)
-		{
-			return x[index];
-		}
-		void set(int index, double value)
-		{
-			x[index] = value;
-		}
-		}
-	};
-
 	ref class Point
 	{
 	private:
 		static int _index = 0;
-		static coords _coord;
+		static array<double^>^ _coord;
 		static array<double^>^ _force;
 		static array<double^>^ _displ;
 		static array<double^>^ _velos;
@@ -126,7 +23,7 @@ namespace myMatch
 		static array<double^>^ _jerk;// 4-th derivative
 	public:
 		property int index { int get() { return _index; } void set(int value) { _index = value; } };
-		property coords coord { coords get() { return _coord; } void set(coords value) { _coord = value; } };
+		property array<double^>^ coord { array<double^>^ get() { return _coord; } void set(array<double^>^ value) { _coord = value; } };
 		property array<double^>^ force { array<double^>^ get() { return _force; } void set(array<double^>^ value) { _force = value; } };
 		property array<double^>^ displ { array<double^>^ get() { return _displ; } void set(array<double^>^ value) { _displ = value; } };
 		property array<double^>^ velos { array<double^>^ get() { return _velos; } void set(array<double^>^ value) { _velos = value; } };
@@ -157,7 +54,6 @@ namespace myMatch
 		static array<double^>^ _accl;// 3-th derivative
 		static array<double^>^ _jerk;// 4-th derivative
 	public:
-		Node() {};
 		property nodeFreedoms nodeFreedom { nodeFreedoms get() { return _nodeFreedom; } void set(nodeFreedoms value) { _nodeFreedom = value; } };
 		property array<int^>^ members { array<int^>^ get() { return _members; } void set(array<int^>^ value) { _members = value; } };
 		property array<double^>^ coord { array<double^>^ get() { return _coord; } void set(array<double^>^ value) { _coord = value; } };
@@ -185,7 +81,6 @@ namespace myMatch
 		static array<Point^>^ _Points;
 		static array<Node^>^ _Nodes;
 	public:
-		timeMoment() {};
 		property array<Point^>^ Points { array<Point^>^ get() { return _Points; } void set(array<Point^>^ value) { _Points = value; } };
 		property array<Node^>^ Nodes { array<Node^>^ get() { return _Nodes; } void set(array<Node^>^ value) { _Nodes = value; } };
 		void initPoints(int numPoints)
@@ -193,25 +88,65 @@ namespace myMatch
 			Points = gcnew array<Point^>(numPoints);
 			for (int i = 0; i < numPoints; i++)
 			{
+				Points[i] = gcnew Point;
 				Points[i]->initValues(i, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
 			}
 		}
 		void initNodes(int numNodes)
 		{
 			Nodes = gcnew array<Node^>(numNodes);
+			Nodes[0] = gcnew Node;
 			Nodes[0]->initValues(nodeFreedoms::x, gcnew array<int^>(2) { 0, 0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
 			for (int i = 1; i < numNodes - 1; i++)
 			{
+				Nodes[i] = gcnew Node;
 				Nodes[i]->initValues(nodeFreedoms::x, gcnew array<int^>(2) { i, i + 1 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
 			}
+			Nodes[numNodes - 1] = gcnew Node;
 			Nodes[numNodes - 1]->initValues(nodeFreedoms::x, gcnew array<int^>(2) { numNodes - 1, numNodes - 1 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 }, gcnew array<double^>(3) { 0.0, 0.0, 0.0 });
 		}
 		void calcNodesMove()
 		{
 			for (int i = 0; i < Nodes->Length; i++)
 			{
-				//Nodes[i]->force = Points[Nodes[i]->members[0]]->force;
+				Nodes[i]->force[0] = Points[(int)(Nodes[i]->members[0])]->force[0];
 				//Nodes[i]->force = Points[Nodes[i]->members[0]]->force + Points[Nodes[i]->members[1]]->force;
+			}
+		}
+	};
+	public ref class muCl {
+	public:
+		int m_i;
+	};
+	public ref class MyClass {
+	public:
+		array<muCl^>^ arrInt;
+		void Test1(int ARRAY_SIZE) {
+			int i;
+			arrInt = gcnew array< muCl^ >(ARRAY_SIZE);
+
+			for (i = 0; i < ARRAY_SIZE; i++) {
+				arrInt[i] = gcnew muCl;
+				arrInt[i]->m_i = i;
+			}
+		}
+	};
+
+	public ref class muArr {
+	public:
+		array<MyClass^>^ arrMyclass;
+		void Test1(int ARRAY_SIZE) {
+			arrMyclass = gcnew array< MyClass^ >(ARRAY_SIZE);
+
+			for (int i = 0; i < ARRAY_SIZE; i++) {
+
+				arrMyclass[i] = gcnew MyClass;
+				arrMyclass[i]->arrInt = gcnew array< muCl^ >(ARRAY_SIZE);
+				for (int j = 0; j < ARRAY_SIZE; j++) {
+
+					arrMyclass[i]->arrInt[j] = gcnew muCl;
+					arrMyclass[i]->arrInt[j]->m_i = i * j;
+				}
 			}
 		}
 	};
@@ -231,21 +166,22 @@ namespace myMatch
 		timeMoments = gcnew array<timeMoment^>(counts);
 		for (int i = 0; i < counts; i++)
 		{
+			timeMoments[i] = gcnew timeMoment;
 			timeMoments[i]->initPoints(numPoints);
 			timeMoments[i]->initNodes(numNodes);
 		}
 	}
 	void LinearModel::calcOneMove(int momentNow, int prevMoment)
 	{
-		/*for (int i = 0; i < timeMoments[momentNow]->Points->Length; i++)
+		for (int i = 0; i < timeMoments[momentNow]->Points->Length; i++)
 		{
-			timeMoments[momentNow]->Points[i]->force = gcnew array<double>(3){ (double)i,0,0 };
+			timeMoments[momentNow]->Points[i]->force[0] = (double)i;
 			timeMoments[momentNow]->calcNodesMove();
-		}*/
+		}
 	}
 	void LinearModel::calcMove()
 	{
-		for (int i = 1; i < 0; i++)
+		for (int i = 1; i < timeMoments->Length; i++)
 		{
 			calcOneMove(i, i - 1);
 		}

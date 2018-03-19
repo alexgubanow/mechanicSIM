@@ -21,14 +21,15 @@ namespace linearElem.ViewModel
     {
         public MainViewModel()
         {
+            muArr newMyClass = new muArr();
+            newMyClass.Test1(10);
             linearModel = new LinearModel();
-            linearModel.initTimeMoments(1000, 5, 6);
+            linearModel.initTimeMoments(10, 5, 6);
             linearModel.calcMove();
             this.Measurements = new Collection<Measurement>();
-
             for (int i = 0; i < linearModel.timeMoments.Length; i++)
             {
-                for (int j = 0; j < linearModel.timeMoments.Length; j++)
+                for (int j = 0; j < linearModel.timeMoments[i].Nodes.Length; j++)
                 {
                     this.Measurements.Add(new Measurement
                     {
@@ -39,8 +40,7 @@ namespace linearElem.ViewModel
                     });
                 }
             }
-
-
+            
 
             //const int N = 50000;
             ////this.Subtitle = "N = " + N;
