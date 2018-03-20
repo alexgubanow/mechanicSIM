@@ -67,13 +67,13 @@ void integrSchems::euler(array<double>^ lastx, array<double>^ lastv, array<doubl
 	ap[1] = F[1] / massa;
 	ap[2] = F[2] / massa * l * l * 0.5;
 
-	vp[0] = lastv[0] + (lasta[0] * deltat);
-	vp[1] = lastv[1] + (lasta[1] * deltat);
-	vp[2] = lastv[2] + (lasta[2] * deltat);
+	vp[0] = lasta[0] * deltat;
+	vp[1] = lasta[1] * deltat;
+	vp[2] = lasta[2] * deltat;
 
-	xp[0] = lastx[0] + (lastv[0] * deltat);
-	xp[1] = lastx[1] + (lastv[1] * deltat);
-	xp[2] = lastx[2] + (lastv[2] * deltat);
+	xp[0] = lastv[0] * deltat;
+	xp[1] = lastv[1] * deltat;
+	xp[2] = lastv[2] * deltat;
 };
 void integrSchems::verlet(array<double>^  lastx, array<double>^  lastv, array<double>^ lasta, array<double>^  F,
 	double deltat, double massa, double l,
