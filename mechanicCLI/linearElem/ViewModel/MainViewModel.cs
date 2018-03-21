@@ -21,20 +21,30 @@ namespace linearElem.ViewModel
     {
         public MainViewModel()
         {
-            linearModel = new LinearModel(100, 0.0001, 5, 6, 1, 100, 10, 1);
-            linearModel.applyLoad(100, 0.001);
+            int counts = 1000;
+            double dt = 0.00001;
+            int elements = 6;
+            int points = elements * 2;
+            int nodes = elements + 1;
+            double l = 0.05;
+            double b = 1;
+            double h = 0.01;
+            linearModel = new LinearModel(counts, dt, nodes, points, 0.01, l, b, h);
+            linearModel.applyLoad(100, 0.05);
             linearModel.calcMove();
             plotViewModel = new PlotModel();
 
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < nodes; j++)
             {
                 var s1 = new LineSeries();
                 s1.Title = "line" + j;
                 s1.StrokeThickness = 1.2;
+                s1.LineStyle = LineStyle.Solid;
+                s1.Color = OxyColor.FromRgb(41,177,255);
                 //s1.RenderInLegend = false;
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < counts; i++)
                 {
-                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].displ[0]));
+                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].displ[0] + l * j));
                 }
                 plotViewModel.Series.Add(s1);
             }
