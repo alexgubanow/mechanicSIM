@@ -116,17 +116,12 @@ namespace myMatch
 		{
 			for (int i = 0; i < timeMoments[momentNow]->Points->Length; i += 2)
 			{
-				//calc force
-				//old version
-				//F[0] = ((elastic * A) / l) * (-(currxi[0] - lastxi[0]));
-				double A = _b * _h;
-				
-				if(i != 0)
+				double A = _b * _h;				
+				if(i != 0 && i != timeMoments[momentNow]->Points->Length)
 				{
 					timeMoments[momentNow]->Points[i]->force[0] = (((elastic * A) / _l) * ((timeMoments[prevMoment]->Points[i + 1]->displ[0] - timeMoments[prevMoment]->Points[i]->displ[0])));
 				}
 				timeMoments[momentNow]->Points[i + 1]->force[0] = 0 - (((elastic * A) / _l) * ((timeMoments[prevMoment]->Points[i + 1]->displ[0] - timeMoments[prevMoment]->Points[i]->displ[0])));
-
 				euler(timeMoments[momentNow]->Points[i], time[1], _m, _l);
 				euler(timeMoments[momentNow]->Points[i + 1], time[1], _m, _l);
 			}

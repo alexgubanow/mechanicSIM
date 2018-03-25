@@ -1,13 +1,57 @@
-﻿<Window x:Class="linearElem.MainWindow"
+﻿<Fluent:RibbonWindow x:Class="linearElem.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:linearElem"
-         xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
+        xmlns:Fluent="urn:fluent-ribbon"
+        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
         mc:Ignorable="d"
+        BorderBrush="Black"
+        BorderThickness="1"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <oxy:PlotView Model="{Binding plotViewModel}" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Fluent:Ribbon Grid.Row="0">
+            <!--Backstage-->
+            <Fluent:Ribbon.Menu>
+                <Fluent:Backstage x:Name="backMenu" Header="File">
+                    <Fluent:BackstageTabControl>
+                        <Fluent:BackstageTabItem Header="sgfsdg">
+                            <StackPanel>
+                                <GroupBox Header="sdfg">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Fluent:CheckBox x:Name="enablepasscheckBox"
+                                                         Header="kgZSDv" />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Fluent:BackstageTabItem>
+                        <Fluent:BackstageTabItem Header="About" />
+                    </Fluent:BackstageTabControl>
+                </Fluent:Backstage>
+            </Fluent:Ribbon.Menu>
+            <!--RibbonContextualTabGroup появляются когда надо, например как редактирование рисунков в Office-->
+            <Fluent:Ribbon.ContextualGroups>
+                <Fluent:RibbonContextualTabGroup Visibility="Visible" x:Name="filGroup"
+                                                 Header="fil" Background="Purple"
+                                                 BorderBrush="Purple" />
+            </Fluent:Ribbon.ContextualGroups>
+            <!--Tabs-->
+            <Fluent:RibbonTabItem Header="Home">
+                <Fluent:RibbonGroupBox Header="dhf">
+                    <Fluent:Button x:Name="addkmlbutton" Header="KML" />
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+        </Fluent:Ribbon>
+        <Grid Grid.Row="1">
+            <StackPanel>
+                <oxy:PlotView Model="{Binding plotViewModel}" />
+            </StackPanel>
+        </Grid>
     </Grid>
-</Window>
+</Fluent:RibbonWindow>

@@ -40,11 +40,12 @@ namespace linearElem.ViewModel
                 s1.Title = "line" + j;
                 s1.StrokeThickness = 1.2;
                 s1.LineStyle = LineStyle.Solid;
-                s1.Color = OxyColor.FromRgb(41,177,255);
+                s1.Color = OxyColor.FromRgb(255, 0, 0);
+                //s1.Color = OxyColor.FromRgb(41, 177, 255);
                 //s1.RenderInLegend = false;
                 for (int i = 0; i < counts; i++)
                 {
-                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].displ[0] + l * j));
+                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].displ[0]));
                 }
                 plotViewModel.Series.Add(s1);
             }
