@@ -15,22 +15,20 @@ namespace myMatch
 	static int elastic = 215000000000;
 
 	public enum class nodeFreedoms { x, y, z, xy, xz, yz, xyz };
-
-	public ref class Point
+	//derivatives
+	public ref class Derivatives
 	{
 	public:
-		int index;
 		array<double>^ coord;
 		array<double>^ force;
 		array<double>^ displ;
 		array<double>^ velos;
 		array<double>^ accl;
 		array<double>^ jerk;
-		void initValues(int, array<double>^, array<double>^, array<double>^, array<double>^, array<double>^, array<double>^);
+		void initValues(array<double>^, array<double>^, array<double>^, array<double>^, array<double>^, array<double>^);
 	};
-	void Point::initValues(int newindex, array<double>^ newcoord, array<double>^ newforce, array<double>^ newdispl, array<double>^ newvelos, array<double>^ newaccl, array<double>^ newjerk)
+	void Derivatives::initValues(array<double>^ newcoord, array<double>^ newforce, array<double>^ newdispl, array<double>^ newvelos, array<double>^ newaccl, array<double>^ newjerk)
 	{
-		index = newindex;
 		coord = newcoord;
 		force = newforce;
 		displ = newdispl;
@@ -39,42 +37,56 @@ namespace myMatch
 		jerk = newjerk;
 	}
 
+	public ref class Point
+	{
+	public:
+		Derivatives derivatives;
+		void initValues(Derivatives newDeriv)
+		{
+			derivatives.initValues(newDeriv.coord, newDeriv.force, newDeriv.displ, newDeriv.velos, newDeriv.accl, newDeriv.jerk);
+		}
+	};
+
+	public ref class Element
+	{
+	public:
+		int index;
+		Point Point1;
+		Point Point2;
+		void initValues(int newIndex, Derivatives newValue)
+		{
+			index = newIndex;
+			//Point1.initValues(newValue);
+		}
+	};
 	public ref class Node
 	{
 	public:
 		nodeFreedoms nodeFreedom;
-		array<int>^ members;
-		array<double>^ coord;
-		array<double>^ force;
-		array<double>^ displ;
-		array<double>^ velos;
-		array<double>^ accl;
-		array<double>^ jerk;
-		void initValues(nodeFreedoms newnodeFreedom, array<int>^ newmembers, array<double>^ newcoord, array<double>^ newforce, array<double>^ newdispl, array<double>^ newvelos, array<double>^ newaccl, array<double>^ newjerk)
+		array<int>^ ListOfLinks;
+		array<int>^ ListOfPoints;
+		Derivatives derivatives;
+		void initValues(nodeFreedoms newnodeFreedom, array<int>^ newListOfLinks, array<int>^ newListOfPoints, Derivatives newDeriv)
 		{
 			nodeFreedom = newnodeFreedom;
-			members = newmembers;
-			coord = newcoord;
-			force = newforce;
-			displ = newdispl;
-			velos = newvelos;
-			accl = newaccl;
-			jerk = newjerk;
+			ListOfLinks = newListOfLinks;
+			ListOfPoints = newListOfPoints;
+			derivatives.initValues(newDeriv.coord, newDeriv.force, newDeriv.displ, newDeriv.velos, newDeriv.accl, newDeriv.jerk);
 		}
 	};
 
 	public ref class timeMoment
 	{
 	public:
-		array<Point^>^ Points;
 		array<Node^>^ Nodes;
+		array<Element^>^ Elements;
 		void initPoints(int numPoints)
 		{
-			Points = gcnew array<Point^>(numPoints);
+			Elements = gcnew array<Element^>(numPoints);
 			for (int i = 0; i < numPoints; i++)
 			{
-				Points[i] = gcnew Point;
-				Points[i]->initValues(i, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 });
+				Elements[i] = gcnew Element;
+				Elements[i]->initValues(i, gcnew Derivatives(gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 } ));
 			}
 		}
 		void initNodes(int numNodes)
@@ -90,31 +102,39 @@ namespace myMatch
 			Nodes[numNodes - 1] = gcnew Node;
 			Nodes[numNodes - 1]->initValues(nodeFreedoms::x, gcnew array<int>(2) { numNodes - 1, numNodes - 1 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 }, gcnew array<double>(3) { 0.0, 0.0, 0.0 });
 		}
-		void calcNodesMove()
-		{
-			Nodes[0]->force[0] = Points[0]->force[0];
-			Nodes[0]->accl[0] = Points[0]->accl[0];
-			Nodes[0]->velos[0] = Points[0]->velos[0];
-			Nodes[0]->displ[0] = Points[0]->displ[0];
-
-			for (int i = 1; i < Nodes->Length - 1; i++)
-			{
-				Nodes[i]->force[0] = Points[Nodes[i]->members[0]]->force[0] + Points[Nodes[i]->members[1]]->force[0];
-				Nodes[i]->accl[0] = Points[Nodes[i]->members[0]]->accl[0] + Points[Nodes[i]->members[1]]->accl[0];
-				Nodes[i]->velos[0] = Points[Nodes[i]->members[0]]->velos[0] + Points[Nodes[i]->members[1]]->velos[0];
-				Nodes[i]->displ[0] = Points[Nodes[i]->members[0]]->displ[0] + Points[Nodes[i]->members[1]]->displ[0];
-				if (i != Nodes->Length - 1)
-				{
-					Points[Nodes[i]->members[1]]->displ[0] = Points[Nodes[i]->members[0]]->displ[0];
-				}
-			}
-		}
 	};
 	public ref class LinearModel
 	{
 		void calcOneMove(int momentNow, int prevMoment)
 		{
-			for (int i = 0; i < timeMoments[momentNow]->Points->Length; i += 2)
+			double A = _b * _h;
+			//overview links of curr node
+			for (int i = 0; i < timeMoments[momentNow]->Nodes->Length; i++)
+			{
+				//calc each link
+				for (int j = 0; j < timeMoments[momentNow]->Nodes[i]->ListOfLinks->Length; j++)
+				{
+					timeMoments[momentNow]->Elements[0]->Point1.derivatives.accl[0] = 0;
+					timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1.derivatives.force[0] = ((elastic * A / _l) *
+						(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2.derivatives.displ[0] -
+							timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1.derivatives.displ[0]));
+
+					timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2.derivatives.force[0] = 0 - ((elastic * A / _l) *
+						(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2.derivatives.displ[0] -
+							timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1.derivatives.displ[0]));
+
+					euler(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1.derivatives, time[1], _m, _l);
+					euler(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2.derivatives, time[1], _m, _l);
+				}
+				//sum all
+			}
+
+
+
+
+
+
+			/*for (int i = 0; i < timeMoments[momentNow]->Points->Length; i += 2)
 			{
 				double A = _b * _h;				
 				if(i != 0 && i != timeMoments[momentNow]->Points->Length)
@@ -125,15 +145,15 @@ namespace myMatch
 				euler(timeMoments[momentNow]->Points[i], time[1], _m, _l);
 				euler(timeMoments[momentNow]->Points[i + 1], time[1], _m, _l);
 			}
-			timeMoments[momentNow]->calcNodesMove();
+			timeMoments[momentNow]->calcNodesMove();*/
 		}
-		void euler(Point^ %momentNow, double deltat, double massa, double l)
+		void euler(Derivatives %momentNow, double deltat, double massa, double l)
 		{
-			if (momentNow->force[0] != 0)
+			if (momentNow.force[0] != 0)
 			{
-				momentNow->accl[0] = momentNow->force[0] / massa;
-				momentNow->velos[0] = momentNow->accl[0] * deltat;
-				momentNow->displ[0] = momentNow->velos[0] * deltat;
+				momentNow.accl[0] = momentNow.force[0] / massa;
+				momentNow.velos[0] = momentNow.accl[0] * deltat;
+				momentNow.displ[0] = momentNow.velos[0] * deltat;
 			}
 			//ap[2] = F[2] / massa * l * l * 0.5;
 		};
@@ -179,7 +199,7 @@ namespace myMatch
 		{
 			for (int i = 0; i < timeMoments->Length; i++)
 			{
-				timeMoments[i]->Points[0]->displ[0] = amp * sin(time[i] * 2 * M_PI * freq);
+				timeMoments[i]->Nodes[0]->derivatives.displ[0] = amp * sin(time[i] * 2 * M_PI * freq);
 			}
 		}
 		void calcMove()
