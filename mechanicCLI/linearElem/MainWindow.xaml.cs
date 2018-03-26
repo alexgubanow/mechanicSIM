@@ -1,21 +1,10 @@
-﻿using linearElem.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using myMatch;
-using MahApps.Metro.Controls;
+﻿//using myMatch;
 using InteractiveDataDisplay.WPF;
+using linearElem.ViewModel;
+using System;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace linearElem
 {
@@ -31,7 +20,7 @@ namespace linearElem
             InitializeComponent();
             var vm = new MainViewModel();
             this.DataContext = vm;
-            for (int i = 1; i < vm.MainWin.linearModel.timeMoments[0].Nodes.Length; i++)
+            for (int i = 1; i < vm.MainWin.linearModel.timeMoments[0].Points.Length; i += 2)
             {
                 var lg = new LineGraph();
                 lines.Children.Add(lg);
@@ -41,12 +30,15 @@ namespace linearElem
                 double[] iojhno = new double[vm.MainWin.linearModel.timeMoments.Length];
                 for (int j = 0; j < vm.MainWin.linearModel.timeMoments.Length; j++)
                 {
-                    iojhno[j] = (vm.MainWin.linearModel.timeMoments[j].Nodes[i].derivatives.displ[0]);
+                    iojhno[j] = (vm.MainWin.linearModel.timeMoments[j].Points[i].derivatives.displ[0] + i * 0.0001);
                 }
                 lg.Plot(vm.MainWin.linearModel.time, iojhno);
             }
         }
+
+        //long _elastic = 215 * pow(10, 9);
     }
+
     public class VisibilityToCheckedConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -59,4 +51,5 @@ namespace linearElem
             return ((bool)value) ? Visibility.Visible : Visibility.Collapsed;
         }
     }
+    
 }

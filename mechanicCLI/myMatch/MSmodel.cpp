@@ -83,7 +83,7 @@ namespace myMatch
 			Nodes = gcnew array<Node^>(numNodes);
 			Elements = gcnew array<Element^>(numElements);
 			Points = gcnew array<Point^>(numElements * 2);
-			for (int i = 0, j = 0; i < numElements; i++, j+=2)
+			for (int i = 0, j = 0; i < numElements; i++, j += 2)
 			{
 				Elements[i] = gcnew Element(j, j + 1, demesia);
 				Points[j] = gcnew Point(3);
@@ -110,24 +110,78 @@ namespace myMatch
 				double massa = ro * A * _l;
 				/*calc each link*/
 
-				double force = -0.00001;
-				double accl = force / massa;
-				double velos = accl * time[1];
-				double displ = velos * time[1];
+				double forcePrev1 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->force[0];
+				double acclPrev1 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->accl[0];
+				double velosPrev1 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->velos[0];
+				double displPrev1 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->displ[0];
+				double velosNow1 = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->velos[0];
+				double displNow1 = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->displ[0];
 
+				double forcePrev2 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->force[0];
+				double acclPrev2 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->accl[0];
+				double velosPrev2 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->velos[0];
+				double displPrev2 = timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->displ[0];
+				double velosNow2 = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->velos[0];
+				double displNow2 = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->displ[0];
 
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] = -1000;
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->accl[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] / massa;
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->velos[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->accl[0] * time[1];
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->displ[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->velos[0] * time[1];
-				/*timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] = 
-					(_elastic * A / _l) * (timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->displ[0] - 
-						timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->displ[0]);*/
-				/*invert force for second point*/
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->force[0] = 1100;
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->accl[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->force[0] / massa;
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->velos[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->accl[0] * time[1];
-				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->displ[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->velos[0] * time[1];
+				//forcePrev1 = -((_elastic * A / _l) * (displPrev2 - displPrev1));
+				if (i == 0)
+				{
+					forcePrev1 = -sin(2 * M_PI * 100 * time[momentNow]) * 0.001;
+				}
+				else
+				{
+					forcePrev1 = -((_elastic * A / _l) * (displPrev2 - displPrev1));
+				}
+				acclPrev1 = forcePrev1 / massa;
+				velosNow1 = velosPrev1 + acclPrev1 * time[1];
+				displNow1 = displPrev1 + velosNow1 * time[1];
+
+				if (i == 0)
+				{
+					forcePrev2 = sin(2 * M_PI * 100 * time[momentNow]) * 0.001;
+				}
+				else
+				{
+					forcePrev2 = ((_elastic * A / _l) * (displPrev2 - displPrev1));
+				}
+				acclPrev2 = forcePrev2 / massa;
+				velosNow2 = velosPrev2 + acclPrev2 * time[1];
+				displNow2 = displPrev2 + velosNow2 * time[1];
+
+				
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->force[0] += forcePrev1;
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->accl[0] += acclPrev1;
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->velos[0] += velosPrev1;
+				if (i != 0)
+				{
+					timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->displ[0] += displPrev1;
+					timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->displ[0] += displNow1;
+				}
+				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->velos[0] += velosNow1;
+
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->force[0] += forcePrev2;
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->accl[0] += acclPrev2;
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->velos[0] += velosPrev2;
+				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->velos[0] += velosNow2;
+				timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->displ[0] += displPrev2;
+				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->displ[0] += displNow2;
+
+				int sdv = 0;
+
+				sdv++;
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] = -1000;
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->accl[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] / massa;
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->velos[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->accl[0] * time[1];
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->displ[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->velos[0] * time[1];
+				///*timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] =
+				//	(_elastic * A / _l) * (timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->displ[0] -
+				//		timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->displ[0]);*/
+				///*invert force for second point*/
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->force[0] = 1100;
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->accl[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->force[0] / massa;
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->velos[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->accl[0] * time[1];
+				//timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->displ[0] = timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->velos[0] * time[1];
 				/*integrate*/
 				/*if( i != 0)
 				{
@@ -140,11 +194,11 @@ namespace myMatch
 			{
 				for (int j = 0; j < timeMoments[momentNow]->Nodes[i]->ListOfPoints->Length; j++)
 				{
-					timeMoments[momentNow]->Nodes[i]->derivatives->force[0] = timeMoments[momentNow]->Nodes[i]->derivatives->force[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->force[0];
-					timeMoments[momentNow]->Nodes[i]->derivatives->accl[0] = timeMoments[momentNow]->Nodes[i]->derivatives->accl[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->accl[0];
-					timeMoments[momentNow]->Nodes[i]->derivatives->velos[0] = timeMoments[momentNow]->Nodes[i]->derivatives->velos[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->velos[0];
-					timeMoments[momentNow]->Nodes[i]->derivatives->displ[0] = timeMoments[momentNow]->Nodes[i]->derivatives->displ[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->displ[0];
-					timeMoments[momentNow]->Nodes[i]->derivatives->coord[0] = timeMoments[momentNow]->Nodes[i]->derivatives->coord[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->coord[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->force[0] += timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->force[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->accl[0] += timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->accl[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->velos[0] += timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->velos[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->displ[0] += timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->displ[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->coord[0] += timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->coord[0];
 				}
 			}
 		}
