@@ -33,7 +33,7 @@ namespace linearElem.ViewModel
     {
         public MainWin()
         {
-            int counts = 500;
+            int counts = 1000;
             double dt = 0.00001;
             int elements = 5;
             //int points = elements * 2;
@@ -44,15 +44,16 @@ namespace linearElem.ViewModel
             double h = 0.1 * Math.Pow(10, -3);
             double massa = 0.1;
             linearModel = new LinearModel(counts, dt, nodes, elements, massa, l, b, h);
-            linearModel.applyLoad(100, 0.000000001);
+            linearModel.applyLoad(100, 0.0001);
             linearModel.calcMove();
             MyList = new ObservableCollection<deriv>();
             for (int i = 0; i < counts; i++)
             {
-                MyList.Add(new deriv() { force = linearModel.timeMoments[i].Nodes[1].derivatives.force[0],
-                    accl = linearModel.timeMoments[i].Nodes[1].derivatives.accl[0],
-                    velos = linearModel.timeMoments[i].Nodes[1].derivatives.velos[0],
-                    displ = linearModel.timeMoments[i].Nodes[1].derivatives.displ[0]
+                MyList.Add(new deriv() {
+                    force = linearModel.timeMoments[i].Nodes[2].derivatives.force[0],
+                    accl = linearModel.timeMoments[i].Nodes[2].derivatives.accl[0],
+                    velos = linearModel.timeMoments[i].Nodes[2].derivatives.velos[0],
+                    displ = linearModel.timeMoments[i].Nodes[2].derivatives.displ[0]
                 });
             }
         }

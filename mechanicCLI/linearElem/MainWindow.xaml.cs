@@ -41,7 +41,7 @@ namespace linearElem
                 double[] iojhno = new double[vm.MainWin.linearModel.timeMoments.Length];
                 for (int j = 0; j < vm.MainWin.linearModel.timeMoments.Length; j++)
                 {
-                    iojhno[i] = (vm.MainWin.linearModel.timeMoments[j].Nodes[i].derivatives.displ[0]);
+                    iojhno[j] = (vm.MainWin.linearModel.timeMoments[j].Nodes[i].derivatives.displ[0]);
                 }
                 lg.Plot(vm.MainWin.linearModel.time, iojhno);
             }
