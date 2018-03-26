@@ -11,17 +11,50 @@
         mc:Ignorable="d"
         BorderBrush="Black"
         BorderThickness="1"
-        Title="MainWindow" Height="600" Width="800">
+        Title="MainWindow" Height="800" Width="800">
     <Window.Resources>
         <local:VisibilityToCheckedConverter x:Key="VisibilityToCheckedConverter"/>
     </Window.Resources>
     <Grid>
-        <Grid.RowDefinitions>
+        <StackPanel>
+            <!--<oxy:PlotView Model="{Binding plotViewModel}" />-->
+            <d3:Chart Name="plotter" Height="400">
+                <d3:Chart.Title>
+                    <TextBlock HorizontalAlignment="Center" FontSize="18" Margin="0,5,0,5">Title</TextBlock>
+                </d3:Chart.Title>
+                <d3:Chart.LegendContent>
+                    <d3:LegendItemsPanel>
+                        <d3:LegendItemsPanel.Resources>
+                            <DataTemplate x:Key="InteractiveDataDisplay.WPF.LineGraph">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox IsChecked="{Binding Path=Visibility, 
+                                            Converter={StaticResource VisibilityToCheckedConverter}, 
+                                            Mode=TwoWay}"/>
+                                    <Line Width="15" Height="15" X1="0" Y1="0" X2="15" Y2="15" 
+                                              Stroke="{Binding Path=Stroke}" StrokeThickness="2"/>
+                                    <TextBlock Margin="5,0,0,0" Text="{Binding Path=Description}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </d3:LegendItemsPanel.Resources>
+                    </d3:LegendItemsPanel>
+                </d3:Chart.LegendContent>
+                <Grid Name="lines"/>
+            </d3:Chart>
+            <DataGrid Name="_dataGrid" Height="400" GridLinesVisibility="All" 
+                                          ItemsSource="{Binding Source=MyList}"  AutoGenerateColumns="False"
+                                          HeadersVisibility="All">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Force" Binding="{Binding force}"/>
+                    <DataGridTextColumn Header="Displ" Binding="{Binding displ}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+        <!--<Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Fluent:Ribbon Grid.Row="0">
-            <!--Backstage-->
+            --><!--Backstage--><!--
             <Fluent:Ribbon.Menu>
                 <Fluent:Backstage x:Name="backMenu" Header="File">
                     <Fluent:BackstageTabControl>
@@ -39,13 +72,13 @@
                     </Fluent:BackstageTabControl>
                 </Fluent:Backstage>
             </Fluent:Ribbon.Menu>
-            <!--RibbonContextualTabGroup появляются когда надо, например как редактирование рисунков в Office-->
+            --><!--RibbonContextualTabGroup появляются когда надо, например как редактирование рисунков в Office--><!--
             <Fluent:Ribbon.ContextualGroups>
                 <Fluent:RibbonContextualTabGroup Visibility="Visible" x:Name="filGroup"
                                                  Header="fil" Background="Purple"
                                                  BorderBrush="Purple" />
             </Fluent:Ribbon.ContextualGroups>
-            <!--Tabs-->
+            --><!--Tabs--><!--
             <Fluent:RibbonTabItem Header="Home">
                 <Fluent:RibbonGroupBox Header="dhf">
                     <Fluent:Button x:Name="addkmlbutton" Header="KML" />
@@ -53,9 +86,7 @@
             </Fluent:RibbonTabItem>
         </Fluent:Ribbon>
         <StackPanel Grid.Row="1">
-            <StackPanel>
-                <oxy:PlotView Model="{Binding plotViewModel}" />
-                <!--<d3:Chart Name="plotter"  Height="400">
+            --><!--<d3:Chart Name="plotter"  Height="400">
                     <d3:Chart.Title>
                         <TextBlock HorizontalAlignment="Center" FontSize="18" Margin="0,5,0,5">Title</TextBlock>
                     </d3:Chart.Title>
@@ -76,8 +107,7 @@
                         </d3:LegendItemsPanel>
                     </d3:Chart.LegendContent>
                     <Grid Name="lines"/>
-                </d3:Chart>-->
-            </StackPanel>
-        </StackPanel>
+                </d3:Chart>--><!--
+        </StackPanel>-->
     </Grid>
 </Fluent:RibbonWindow>

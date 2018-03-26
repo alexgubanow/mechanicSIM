@@ -1,7 +1,11 @@
 using GalaSoft.MvvmLight;
 using myMatch;
 using OxyPlot;
-using OxyPlot.Series;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
 
 namespace linearElem.ViewModel
 {
@@ -21,57 +25,70 @@ namespace linearElem.ViewModel
     {
         public MainViewModel()
         {
-            int counts = 1000;
+            MainWin = new MainWin();
+        }
+        public MainWin MainWin { get; set; }
+    }
+    public class MainWin : INotifyPropertyChanged
+    {
+        public MainWin()
+        {
+            int counts = 500;
             double dt = 0.00001;
-            int elements = 6;
+            int elements = 5;
             //int points = elements * 2;
             int nodes = elements + 1;
-            double l = 0.05;
-            double b = 1;
-            double h = 0.01;
-            linearModel = new LinearModel(counts, dt, nodes, elements, 0.01, l, b, h);
-            linearModel.applyLoad(100, 0.05);
+            double Length = 180;
+            double l = Length / elements * Math.Pow(10, -3);
+            double b = 10 * Math.Pow(10, -3);
+            double h = 0.1 * Math.Pow(10, -3);
+            double massa = 0.1;
+            linearModel = new LinearModel(counts, dt, nodes, elements, massa, l, b, h);
+            linearModel.applyLoad(100, 0.000000001);
             linearModel.calcMove();
-            plotViewModel = new PlotModel();
-
-            for (int j = 0; j < nodes; j++)
+            MyList = new ObservableCollection<deriv>();
+            for (int i = 0; i < counts; i++)
             {
-                var s1 = new LineSeries();
-                s1.Title = "line" + j;
-                s1.StrokeThickness = 1.2;
-                s1.LineStyle = LineStyle.Solid;
-                s1.Color = OxyColor.FromRgb(255, 0, 0);
-                //s1.Color = OxyColor.FromRgb(41, 177, 255);
-                //s1.RenderInLegend = false;
-                for (int i = 0; i < counts; i++)
-                {
-                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].derivatives.displ[0]));
-                }
-                plotViewModel.Series.Add(s1);
+                MyList.Add(new deriv() { force = linearModel.timeMoments[i].Nodes[1].derivatives.force[0],
+                    accl = linearModel.timeMoments[i].Nodes[1].derivatives.accl[0],
+                    velos = linearModel.timeMoments[i].Nodes[1].derivatives.velos[0],
+                    displ = linearModel.timeMoments[i].Nodes[1].derivatives.displ[0]
+                });
             }
         }
+        ObservableCollection<deriv> _MyList;
+        public ObservableCollection<deriv> MyList { get { return _MyList; } set { _MyList = value; RaisePropertyChanged("MyList"); }  }
 
-        private PlotModel _plotModel;
-
-        public PlotModel plotViewModel
+        public class deriv : INotifyPropertyChanged
         {
-            get
-            {
-                return _plotModel;
-            }
+            double _force;
+            public double force { get => _force; set { _force = value; RaisePropertyChanged("force");} }
+            double _accl;
+            public double accl { get => _accl; set { _accl = value; RaisePropertyChanged("accl"); } }
+            double _velos;
+            public double velos { get => _velos; set { _velos = value; RaisePropertyChanged("velos"); } }
+            double _displ;
+            public double displ { get => _displ; set { _displ = value; RaisePropertyChanged("displ"); } }
 
-            set
-            {
-                if (_plotModel == value)
-                {
-                    return;
-                }
 
-                _plotModel = value;
-                RaisePropertyChanged("plotViewModel");
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void RaisePropertyChanged(string propertyName)
+            {
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
         public LinearModel linearModel { get; private set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

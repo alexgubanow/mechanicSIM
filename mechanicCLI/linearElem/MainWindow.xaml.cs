@@ -24,24 +24,27 @@ namespace linearElem
     /// </summary>
     public partial class MainWindow
     {
+        public MainViewModel vm;
+
         public MainWindow()
         {
             InitializeComponent();
             var vm = new MainViewModel();
             this.DataContext = vm;
-            //double[] x = new double[1000];
-            //for (int i = 0; i < x.Length; i++)
-            //    x[i] = 3.1415 * i / (x.Length - 1);
-
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    var lg = new LineGraph();
-            //    lines.Children.Add(lg);
-            //    lg.Stroke = new SolidColorBrush(Color.FromArgb(255, 0, (byte)(i * 10), 0));
-            //    lg.Description = String.Format("Data series {0}", i + 1);
-            //    lg.StrokeThickness = 1;
-            //    lg.Plot(x, x.Select(v => Math.Sin(v + i / 10.0)).ToArray());
-            //}
+            for (int i = 1; i < vm.MainWin.linearModel.timeMoments[0].Nodes.Length; i++)
+            {
+                var lg = new LineGraph();
+                lines.Children.Add(lg);
+                lg.Stroke = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+                lg.Description = String.Format("Node {0}", i + 1);
+                lg.StrokeThickness = 1;
+                double[] iojhno = new double[vm.MainWin.linearModel.timeMoments.Length];
+                for (int j = 0; j < vm.MainWin.linearModel.timeMoments.Length; j++)
+                {
+                    iojhno[i] = (vm.MainWin.linearModel.timeMoments[j].Nodes[i].derivatives.displ[0]);
+                }
+                lg.Plot(vm.MainWin.linearModel.time, iojhno);
+            }
         }
     }
     public class VisibilityToCheckedConverter : IValueConverter

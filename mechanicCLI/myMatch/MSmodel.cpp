@@ -12,8 +12,7 @@ using namespace System::IO;
 
 namespace myMatch
 {
-	static long long elastic = 215000000000;
-
+	long long _elastic = 215 * pow(10, 9);
 	public enum class nodeFreedoms { x, y, z, xy, xz, yz, xyz };
 	//derivatives
 	public ref class Derivatives
@@ -39,11 +38,9 @@ namespace myMatch
 	public ref class Point
 	{
 	public:
-		int index;
 		Derivatives ^ derivatives;
-		Point(int newIndex, int demesia)
+		Point(int demesia)
 		{
-			index = newIndex;
 			derivatives = gcnew Derivatives(demesia);
 		}
 	};
@@ -51,12 +48,10 @@ namespace myMatch
 	public ref class Element
 	{
 	public:
-		int index;
 		int point1;
 		int point2;
-		Element(int ElementIndex, int point1Index, int point2Index, int demesia)
+		Element(int point1Index, int point2Index, int demesia)
 		{
-			index = ElementIndex;
 			point1 = point1Index;
 			point2 = point2Index;
 		}
@@ -87,10 +82,16 @@ namespace myMatch
 		{
 			Nodes = gcnew array<Node^>(numNodes);
 			Elements = gcnew array<Element^>(numElements);
-			Nodes[0] = gcnew Node(nodeFreedoms::x, gcnew array<int>(1) { 0 }, gcnew array<int>(1) { 0 }, demesia);
-			for (int i = 1, j = 1, k = 0; i < numNodes - 1; i++, j += 2, k++)
+			Points = gcnew array<Point^>(numElements * 2);
+			for (int i = 0, j = 0; i < numElements; i++, j+=2)
 			{
-				Elements[k] = gcnew Element(k, j - 1, j, demesia);
+				Elements[i] = gcnew Element(j, j + 1, demesia);
+				Points[j] = gcnew Point(3);
+				Points[j + 1] = gcnew Point(3);
+			}
+			Nodes[0] = gcnew Node(nodeFreedoms::x, gcnew array<int>(1) { 0 }, gcnew array<int>(1) { 0 }, demesia);
+			for (int i = 1, j = 1; i < numNodes - 1; i++, j += 2)
+			{
 				Nodes[i] = gcnew Node(nodeFreedoms::x, gcnew array<int>(2) { i - 1, i }, gcnew array<int>(2) { j, j + 1 }, demesia);
 			}
 			Nodes[numNodes - 1] = gcnew Node(nodeFreedoms::x, gcnew array<int>(1) { numNodes - 2 }, gcnew array<int>(2) { numNodes }, demesia);
@@ -101,35 +102,47 @@ namespace myMatch
 		void calcOneMove(int momentNow, int prevMoment)
 		{
 			double A = _b * _h;
+			//double A = 0.00000001;
 			//overview links of curr node
-			for (int i = 0; i < timeMoments[momentNow]->Nodes->Length; i++)
+			for (int i = 0; i < timeMoments[momentNow]->Elements->Length; i++)
 			{
-				//calc each link
-				for (int j = 0; j < timeMoments[momentNow]->Nodes[i]->ListOfLinks->Length; j++)
+				double ro = 7.8 * pow(10, 3);
+				double massa = ro * A * _l;
+				/*calc each link*/
+				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->force[0] = 
+					(_elastic * A / _l) * (timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point2]->derivatives->displ[0] - 
+						timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives->displ[0]);
+				/*invert force for second point*/
+				timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives->force[0] = 0 -
+					timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives->force[0];
+				/*integrate*/
+				if( i != 0)
 				{
-					/*timeMoments[momentNow]->Elements[0]->Point1->derivatives->accl[0] = 0;
-					timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1->derivatives->force[0] = ((elastic * A / _l) *
-						(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2->derivatives->displ[0] -
-							timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1->derivatives->displ[0]));
-
-					timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2->derivatives->force[0] = 0 - ((elastic * A / _l) *
-						(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2->derivatives->displ[0] -
-							timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1->derivatives->displ[0]));
-
-					euler(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point1->derivatives, time[1], _m, _l);
-					euler(timeMoments[momentNow]->Elements[timeMoments[momentNow]->Nodes[i]->ListOfLinks[j]]->Point2->derivatives, time[1], _m, _l);*/
+					euler(timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives, timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point1]->derivatives, time[1], massa, _l);
 				}
-				//sum all
+				euler(timeMoments[prevMoment]->Points[timeMoments[prevMoment]->Elements[i]->point1]->derivatives, timeMoments[momentNow]->Points[timeMoments[momentNow]->Elements[i]->point2]->derivatives, time[1], massa, _l);
 			}
-			/*timeMoments[momentNow]->calcNodesMove();*/
+			//sum all
+			for (int i = 1; i < timeMoments[momentNow]->Nodes->Length - 1; i++)
+			{
+				for (int j = 0; j < timeMoments[momentNow]->Nodes[i]->ListOfPoints->Length; j++)
+				{
+					timeMoments[momentNow]->Nodes[i]->derivatives->force[0] = timeMoments[momentNow]->Nodes[i]->derivatives->force[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->force[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->accl[0] = timeMoments[momentNow]->Nodes[i]->derivatives->accl[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->accl[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->velos[0] = timeMoments[momentNow]->Nodes[i]->derivatives->velos[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->velos[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->displ[0] = timeMoments[momentNow]->Nodes[i]->derivatives->displ[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->displ[0];
+					timeMoments[momentNow]->Nodes[i]->derivatives->coord[0] = timeMoments[momentNow]->Nodes[i]->derivatives->coord[0] + timeMoments[momentNow]->Points[timeMoments[momentNow]->Nodes[i]->ListOfPoints[j]]->derivatives->coord[0];
+				}
+			}
 		}
-		void euler(Derivatives^ %moment, double deltat, double massa, double l)
+		void euler(Derivatives^ prevMoment, Derivatives^ %moment, double deltat, double massa, double l)
 		{
 			if (moment->force[0] != 0)
 			{
-				moment->accl[0] = moment->force[0] / massa;
-				moment->velos[0] = moment->accl[0] * deltat;
-				moment->displ[0] = moment->velos[0] * deltat;
+				moment->accl[0] = prevMoment->accl[0] + moment->force[0] / massa;
+				moment->velos[0] = prevMoment->velos[0] + moment->accl[0] * deltat;
+				moment->displ[0] = prevMoment->displ[0] + moment->velos[0] * deltat;
+				moment->coord[0] = prevMoment->coord[0] + moment->displ[0];
 			}
 			//ap[2] = F[2] / massa * l * l * 0.5;
 		};
@@ -174,6 +187,10 @@ namespace myMatch
 			for (int i = 0; i < timeMoments->Length; i++)
 			{
 				timeMoments[i]->Nodes[0]->derivatives->displ[0] = amp * sin(time[i] * 2 * M_PI * freq);
+				for (int j = 0; j < timeMoments[i]->Nodes[0]->ListOfPoints->Length; j++)
+				{
+					timeMoments[i]->Points[timeMoments[i]->Nodes[0]->ListOfPoints[j]]->derivatives->displ[0] = timeMoments[i]->Nodes[0]->derivatives->displ[0];
+				}
 			}
 		}
 		void calcMove()
