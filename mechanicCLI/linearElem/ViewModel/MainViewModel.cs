@@ -24,12 +24,12 @@ namespace linearElem.ViewModel
             int counts = 1000;
             double dt = 0.00001;
             int elements = 6;
-            int points = elements * 2;
+            //int points = elements * 2;
             int nodes = elements + 1;
             double l = 0.05;
             double b = 1;
             double h = 0.01;
-            linearModel = new LinearModel(counts, dt, nodes, points, 0.01, l, b, h);
+            linearModel = new LinearModel(counts, dt, nodes, elements, 0.01, l, b, h);
             linearModel.applyLoad(100, 0.05);
             linearModel.calcMove();
             plotViewModel = new PlotModel();
@@ -45,7 +45,7 @@ namespace linearElem.ViewModel
                 //s1.RenderInLegend = false;
                 for (int i = 0; i < counts; i++)
                 {
-                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].displ[0]));
+                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].derivatives.displ[0]));
                 }
                 plotViewModel.Series.Add(s1);
             }
