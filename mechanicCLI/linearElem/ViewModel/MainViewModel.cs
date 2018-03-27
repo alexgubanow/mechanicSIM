@@ -177,7 +177,6 @@ namespace linearElem.ViewModel
             {
                 double A = _b * _h;
                 double _elastic = 215 * Math.Pow(10, 9);
-                //double A = 0.00000001;
                 //overview links of curr node
                 for (int i = 0; i < timeMoments[momentNow].Elements.Length; i++)
                 {
@@ -213,36 +212,30 @@ namespace linearElem.ViewModel
 
                     timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point1].derivatives.force[0] += forcePrev1;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point1].derivatives.accl[0] += acclNow1;
-                    //timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point1].derivatives.velos[0] += velosPrev1;
-                    if (i != 0)
-                    {
-                        //timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point1].derivatives.displ[0] += displPrev1;
-                        timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point1].derivatives.displ[0] += displNow1;
-                    }
+                    timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point1].derivatives.displ[0] += displNow1;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point1].derivatives.velos[0] += velosNow1;
 
                     timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point2].derivatives.force[0] += forcePrev2;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.accl[0] += acclNow2;
-                    //timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point2].derivatives.velos[0] += velosPrev2;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.velos[0] += velosNow2;
-                    //timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point2].derivatives.displ[0] += displPrev2;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.displ[0] += displNow2;
-
-                    int sdv = 0;
-
-                    sdv++;
                 }
                 //sum all
-                for (int i = 1; i < timeMoments[momentNow].Nodes.Length - 1; i++)
+                for (int i = 0; i < timeMoments[momentNow].Nodes.Length - 1; i++)
                 {
-                    for (int j = 0; j < timeMoments[momentNow].Nodes[i].ListOfPoints.Length; j++)
-                    {
-                        timeMoments[momentNow].Nodes[i].derivatives.force[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.force[0];
-                        timeMoments[momentNow].Nodes[i].derivatives.accl[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.accl[0];
-                        timeMoments[momentNow].Nodes[i].derivatives.velos[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.velos[0];
-                        timeMoments[momentNow].Nodes[i].derivatives.displ[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.displ[0];
-                        timeMoments[momentNow].Nodes[i].derivatives.coord[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.coord[0];
-                    }
+                    timeMoments[momentNow].Nodes[i].derivatives.force[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.force[0];
+                    timeMoments[momentNow].Nodes[i].derivatives.accl[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.accl[0];
+                    timeMoments[momentNow].Nodes[i].derivatives.velos[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.velos[0];
+                    timeMoments[momentNow].Nodes[i].derivatives.displ[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.displ[0];
+                    timeMoments[momentNow].Nodes[i].derivatives.coord[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.coord[0];
+                    //for (int j = 0; j < timeMoments[momentNow].Nodes[i].ListOfPoints.Length; j++)
+                    //{
+                    //    timeMoments[momentNow].Nodes[i].derivatives.force[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.force[0];
+                    //    timeMoments[momentNow].Nodes[i].derivatives.accl[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.accl[0];
+                    //    timeMoments[momentNow].Nodes[i].derivatives.velos[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.velos[0];
+                    //    timeMoments[momentNow].Nodes[i].derivatives.displ[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.displ[0];
+                    //    timeMoments[momentNow].Nodes[i].derivatives.coord[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.coord[0];
+                    //}
                 }
             }
 

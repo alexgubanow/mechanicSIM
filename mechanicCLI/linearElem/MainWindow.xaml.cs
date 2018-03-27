@@ -20,7 +20,7 @@ namespace linearElem
             InitializeComponent();
             var vm = new MainViewModel();
             this.DataContext = vm;
-            for (int i = 1; i < vm.MainWin.linearModel.timeMoments[0].Points.Length; i += 2)
+            for (int i = 0; i < vm.MainWin.linearModel.timeMoments[0].Nodes.Length; i ++)
             {
                 var lg = new LineGraph();
                 lines.Children.Add(lg);
@@ -30,7 +30,7 @@ namespace linearElem
                 double[] iojhno = new double[vm.MainWin.linearModel.timeMoments.Length];
                 for (int j = 0; j < vm.MainWin.linearModel.timeMoments.Length; j++)
                 {
-                    iojhno[j] = (vm.MainWin.linearModel.timeMoments[j].Points[i].derivatives.displ[0] + i * 0.0001);
+                    iojhno[j] = (vm.MainWin.linearModel.timeMoments[j].Nodes[i].derivatives.displ[0] + i * 0.0001);
                 }
                 lg.Plot(vm.MainWin.linearModel.time, iojhno);
             }
