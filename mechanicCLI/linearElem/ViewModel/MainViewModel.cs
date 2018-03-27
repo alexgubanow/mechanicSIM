@@ -1,11 +1,12 @@
 using GalaSoft.MvvmLight;
-//using myMatch;
+using InteractiveDataDisplay.WPF;
 using OxyPlot;
+using OxyPlot.Series;
+
+//using myMatch;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data;
 
 namespace linearElem.ViewModel
 {
@@ -27,51 +28,110 @@ namespace linearElem.ViewModel
         {
             MainWin = new MainWin();
         }
+
         public MainWin MainWin { get; set; }
     }
+
     public class MainWin : INotifyPropertyChanged
     {
         public MainWin()
         {
-            int counts = 1000;
-            double dt = 0.00001;
+            freq = 100;
+            amp = 1;
+            reCalc();
+            //MyList = new ObservableCollection<deriv>();
+            //for (int i = 0; i < counts; i++)
+            //{
+            //    MyList.Add(new deriv()
+            //    {
+            //        force = linearModel.timeMoments[i].Points[1].derivatives.force[0],
+            //        accl = linearModel.timeMoments[i].Points[1].derivatives.accl[0],
+            //        velos = linearModel.timeMoments[i].Points[1].derivatives.velos[0],
+            //        displ = linearModel.timeMoments[i].Points[1].derivatives.displ[0]
+            //    });
+            //}
+        }
+
+        private void reCalc()
+        {
+            int counts = 9000;
+            double dt = 0.000003;
             int elements = 5;
             //int points = elements * 2;
             int nodes = elements + 1;
             double Length = 180;
             double l = Length / elements * Math.Pow(10, -3);
-            double b = 10 * Math.Pow(10, -3);
+            double b = 50 * Math.Pow(10, -3);
             double h = 0.1 * Math.Pow(10, -3);
             double massa = 0.1;
             linearModel = new LinearModel(counts, dt, nodes, elements, massa, l, b, h);
-            //linearModel.applyLoad(100, 0.0001);
+            linearModel.applyLoad(freq, (amp * Math.Pow(10, -2)));
             linearModel.calcMove();
-            MyList = new ObservableCollection<deriv>();
-            for (int i = 0; i < counts; i++)
+            //lg = new LineGraph();
+            //for (int i = 0; i < linearModel.timeMoments[0].Nodes.Length; i++)
+            //{
+            //    lg.Stroke = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+            //    lg.Description = String.Format("Node {0}", i + 1);
+            //    lg.StrokeThickness = 1;
+            //    double[] iojhno = new double[linearModel.timeMoments.Length];
+            //    for (int j = 0; j < linearModel.timeMoments.Length; j++)
+            //    {
+            //        iojhno[j] = (linearModel.timeMoments[j].Nodes[i].derivatives.displ[0] + i * 0.036);
+            //    }
+            //    lg.Plot(linearModel.time, iojhno);
+            //}
+            plotViewModel = new PlotModel();
+            for (int j = 0; j < linearModel.timeMoments[0].Nodes.Length; j++)
             {
-                MyList.Add(new deriv() {
-                    force = linearModel.timeMoments[i].Points[1].derivatives.force[0],
-                    accl = linearModel.timeMoments[i].Points[1].derivatives.accl[0],
-                    velos = linearModel.timeMoments[i].Points[1].derivatives.velos[0],
-                    displ = linearModel.timeMoments[i].Points[1].derivatives.displ[0]
-                });
+                var s1 = new LineSeries();
+                s1.Title = "node" + j;
+                s1.StrokeThickness = 1.2;
+                s1.LineStyle = LineStyle.Solid;
+                s1.Color = OxyColor.FromRgb(255, 0, 0);
+                //s1.Color = OxyColor.FromRgb(41, 177, 255);
+                //s1.RenderInLegend = false;
+                for (int i = 0; i < counts; i++)
+                {
+                    s1.Points.Add(new DataPoint(linearModel.time[i], linearModel.timeMoments[i].Nodes[j].derivatives.displ[0]));
+                }
+                plotViewModel.Series.Add(s1);
             }
         }
-        ObservableCollection<deriv> _MyList;
-        public ObservableCollection<deriv> MyList { get { return _MyList; } set { _MyList = value; RaisePropertyChanged("MyList"); }  }
+
+        private PlotModel _plotViewModel;
+
+        public PlotModel plotViewModel { get => _plotViewModel; set { _plotViewModel = value; RaisePropertyChanged("plotViewModel"); } }
+
+        private LineGraph _lg;
+        public LineGraph lg { get => _lg; set { _lg = value; RaisePropertyChanged("lg"); } }
+
+        private int _freq;
+        public int freq
+        {
+            get { return _freq; }
+            set {
+                _freq = value;
+                RaisePropertyChanged("freq");
+                reCalc();
+            }
+        }
+
+        private int _amp;
+        public int amp { get => _amp; set { _amp = value; RaisePropertyChanged("amp"); } }
+
+        private ObservableCollection<deriv> _MyList;
+        public ObservableCollection<deriv> MyList { get { return _MyList; } set { _MyList = value; RaisePropertyChanged("MyList"); } }
 
         public class deriv : INotifyPropertyChanged
         {
-            double _force;
-            public double force { get => _force; set { _force = value; RaisePropertyChanged("force");} }
-            double _accl;
+            private double _force;
+            public double force { get => _force; set { _force = value; RaisePropertyChanged("force"); } }
+            private double _accl;
             public double accl { get => _accl; set { _accl = value; RaisePropertyChanged("accl"); } }
-            double _velos;
+            private double _velos;
             public double velos { get => _velos; set { _velos = value; RaisePropertyChanged("velos"); } }
-            double _displ;
+            private double _displ;
             public double displ { get => _displ; set { _displ = value; RaisePropertyChanged("displ"); } }
-
-
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -181,9 +241,9 @@ namespace linearElem.ViewModel
                 for (int i = 0; i < timeMoments[momentNow].Elements.Length; i++)
                 {
                     double ro = 7.8 * Math.Pow(10, 3);
+                    //double ro = 6.12 * Math.Pow(10, 4);
                     double massa = ro * A * _l;
                     /*calc each link*/
-
                     double forcePrev1 = timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point1].derivatives.force[0];
                     double acclNow1 = timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point1].derivatives.accl[0];
                     double velosPrev1 = timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point1].derivatives.velos[0];
@@ -198,17 +258,15 @@ namespace linearElem.ViewModel
                     double velosNow2 = timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.velos[0];
                     double displNow2 = timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.displ[0];
 
-                    //forcePrev1 = -((_elastic * A / _l) * (displPrev2 - displPrev1));
-
-                    forcePrev1 = -Math.Sin(2 * Math.PI * 200 * time[momentNow]) * 0.01;
+                    forcePrev1 = ((_elastic * A / _l) * (displPrev2 - displPrev1));
                     acclNow1 = forcePrev1 / massa;
-                    velosNow1 = velosPrev1 + acclNow1 * time[1];
-                    displNow1 = displPrev1 + velosNow1 * time[1];
+                    velosNow1 = acclNow1 * time[1];
+                    displNow1 = velosNow1 * time[1];
 
-                    forcePrev2 = Math.Sin(2 * Math.PI * 200 * time[momentNow]) * 0.01;
+                    forcePrev2 = -((_elastic * A / _l) * (displPrev2 - displPrev1));
                     acclNow2 = forcePrev2 / massa;
-                    velosNow2 = velosPrev2 + acclNow2 * time[1];
-                    displNow2 = displPrev2 + velosNow2 * time[1];
+                    velosNow2 = acclNow2 * time[1];
+                    displNow2 = velosNow2 * time[1];
 
                     timeMoments[prevMoment].Points[timeMoments[prevMoment].Elements[i].point1].derivatives.force[0] += forcePrev1;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point1].derivatives.accl[0] += acclNow1;
@@ -220,22 +278,26 @@ namespace linearElem.ViewModel
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.velos[0] += velosNow2;
                     timeMoments[momentNow].Points[timeMoments[momentNow].Elements[i].point2].derivatives.displ[0] += displNow2;
                 }
-                //sum all
                 for (int i = 0; i < timeMoments[momentNow].Nodes.Length - 1; i++)
                 {
-                    timeMoments[momentNow].Nodes[i].derivatives.force[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.force[0];
-                    timeMoments[momentNow].Nodes[i].derivatives.accl[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.accl[0];
-                    timeMoments[momentNow].Nodes[i].derivatives.velos[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.velos[0];
-                    timeMoments[momentNow].Nodes[i].derivatives.displ[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.displ[0];
-                    timeMoments[momentNow].Nodes[i].derivatives.coord[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[timeMoments[momentNow].Nodes[i].ListOfPoints.Length - 1]].derivatives.coord[0];
-                    //for (int j = 0; j < timeMoments[momentNow].Nodes[i].ListOfPoints.Length; j++)
-                    //{
-                    //    timeMoments[momentNow].Nodes[i].derivatives.force[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.force[0];
-                    //    timeMoments[momentNow].Nodes[i].derivatives.accl[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.accl[0];
-                    //    timeMoments[momentNow].Nodes[i].derivatives.velos[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.velos[0];
-                    //    timeMoments[momentNow].Nodes[i].derivatives.displ[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.displ[0];
-                    //    timeMoments[momentNow].Nodes[i].derivatives.coord[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.coord[0];
-                    //}
+                    //sum all
+                    for (int j = 0; j < timeMoments[momentNow].Nodes[i].ListOfPoints.Length; j++)
+                    {
+                        timeMoments[momentNow].Nodes[i].derivatives.force[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.force[0];
+                        timeMoments[momentNow].Nodes[i].derivatives.accl[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.accl[0];
+                        timeMoments[momentNow].Nodes[i].derivatives.velos[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.velos[0];
+                        timeMoments[momentNow].Nodes[i].derivatives.displ[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.displ[0];
+                        timeMoments[momentNow].Nodes[i].derivatives.coord[0] += timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.coord[0];
+                    }
+                    //update final value of points inside node
+                    for (int j = 0; j < timeMoments[momentNow].Nodes[i].ListOfPoints.Length; j++)
+                    {
+                        timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.force[0] = timeMoments[momentNow].Nodes[i].derivatives.force[0];
+                        timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.accl[0] = timeMoments[momentNow].Nodes[i].derivatives.accl[0];
+                        timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.velos[0] = timeMoments[momentNow].Nodes[i].derivatives.velos[0];
+                        timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.displ[0] = timeMoments[momentNow].Nodes[i].derivatives.displ[0];
+                        timeMoments[momentNow].Points[timeMoments[momentNow].Nodes[i].ListOfPoints[j]].derivatives.coord[0] = timeMoments[momentNow].Nodes[i].derivatives.coord[0];
+                    }
                 }
             }
 
@@ -307,9 +369,12 @@ namespace linearElem.ViewModel
                 for (int i = 1; i < timeMoments.Length; i++)
                 {
                     calcOneMove(i, i - 1);
+                    if (timeMoments[i].Points[timeMoments[i].Points.Length - 1].derivatives.displ[0] > 0.001 || timeMoments[i].Points[timeMoments[i].Points.Length - 1].derivatives.displ[0] < -0.001)
+                    { break; }
                 }
             }
         }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void RaisePropertyChanged(string propertyName)
